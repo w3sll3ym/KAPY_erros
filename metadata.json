@@ -1,0 +1,6 @@
+{
+  "name": "Sistema de Tratamento de Erros Reportados",
+  "description": "Sistema de gestão e tratamento de erros com workflow colaborativo entre CSM, Analista/Supervisor e Qualidade.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

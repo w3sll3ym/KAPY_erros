@@ -1,0 +1,32 @@
+{
+  "$schema": "https://raw.githubusercontent.com/firebase/firebase-tools/master/schema/firestore-blueprint.json",
+  "entities": {
+    "tickets": {
+      "description": "Erros e chamados reportados com fluxo de aprovação entre CSM, Analista e Qualidade",
+      "fields": {
+        "code": { "type": "string", "description": "Código identificador do chamado (ex: ERR-2026-0001)" },
+        "title": { "type": "string", "description": "Título descritivo do erro" },
+        "clientName": { "type": "string", "description": "Nome da empresa/cliente" },
+        "clientSegment": { "type": "string", "description": "Segmento do cliente" },
+        "category": { "type": "string", "description": "Módulo ou categoria do sistema" },
+        "severity": { "type": "string", "description": "Severidade: BAIXA, MEDIA, ALTA, CRITICA" },
+        "status": { "type": "string", "description": "Status do workflow" },
+        "description": { "type": "string", "description": "Descrição detalhada do problema e impacto" },
+        "analystCell": { "type": "string", "description": "Célula do Analista" },
+        "analysisDate": { "type": "string", "description": "Data da Análise" },
+        "documentList": { "type": "string", "description": "Listagem de documentos" },
+        "errorReasonDC": { "type": "string", "description": "Motivo do Erro - DC" },
+        "analystName": { "type": "string", "description": "Nome do Analista" },
+        "impactedEmployeesCount": { "type": "number", "description": "Quantidade de colaboradores impactados" },
+        "impactedCompetenciesCount": { "type": "number", "description": "Quantidade de competências impactadas" },
+        "reproductionSteps": { "type": "string", "description": "Passos para reprodução" },
+        "attachments": { "type": "array", "description": "Lista de anexos e URLs" },
+        "createdAt": { "type": "string", "description": "Data de criação em ISO" },
+        "updatedAt": { "type": "string", "description": "Data de atualização em ISO" },
+        "createdByName": { "type": "string", "description": "Nome do criador" },
+        "createdByRole": { "type": "string", "description": "Papel do criador (CSM)" },
+        "timeline": { "type": "array", "description": "Trilha cronológica de auditoria e decisões" }
+      }
+    }
+  }
+}
