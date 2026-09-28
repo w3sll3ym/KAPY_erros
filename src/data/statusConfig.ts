@@ -43,9 +43,9 @@ export const STATUS_CONFIG: Record<TicketStatus, StatusConfig> = {
     isFinal: false,
   },
   INFORMACOES_FALTANDO: {
-    label: 'Contestado pelo Analista (Info Faltando)',
-    shortLabel: 'Contestado (Info Faltando)',
-    description: 'Contestado pelo Analista/Supervisor por falta de dados. Retornado ao CSM para complemento.',
+    label: 'Contestado pelo Analista (Esperando Correção do CSM)',
+    shortLabel: 'Contestado (Esperando CSM)',
+    description: 'Contestado pelo Analista/Supervisor por falta de dados. Retornado ao CSM para correção e complemento.',
     color: {
       bg: 'bg-amber-50',
       text: 'text-amber-800',
@@ -58,8 +58,8 @@ export const STATUS_CONFIG: Record<TicketStatus, StatusConfig> = {
   },
   APROVADO_ANALISTA: {
     label: 'Aprovado pelo Analista (Aguardando Qualidade)',
-    shortLabel: 'Aprovado (Analista)',
-    description: 'Aprovado pelo Analista/Supervisor e encaminhado para análise da Qualidade.',
+    shortLabel: 'Aprovado pelo Analista',
+    description: 'Aprovado pelo Analista/Supervisor e encaminhado para análise técnica e homologação da Qualidade.',
     color: {
       bg: 'bg-blue-50',
       text: 'text-blue-800',
@@ -71,9 +71,9 @@ export const STATUS_CONFIG: Record<TicketStatus, StatusConfig> = {
     isFinal: false,
   },
   REPROVADO_ANALISTA: {
-    label: 'Reprovado pelo Analista (Aguardando Parecer)',
-    shortLabel: 'Reprovado (Analista)',
-    description: 'Reprovado pelo Analista/Supervisor aguardando parecer final da Qualidade se aprova ou reprova.',
+    label: 'Reprovado pelo Analista (Esperando Parecer da Qualidade)',
+    shortLabel: 'Reprovado (Esperando Qualidade)',
+    description: 'Reprovado pelo Analista/Supervisor aguardando parecer final da Qualidade (aprovação ou reprovação).',
     color: {
       bg: 'bg-orange-50',
       text: 'text-orange-800',

@@ -123,7 +123,6 @@ export const WorkflowStepper: React.FC<{ status: TicketStatus }> = ({ status }) 
     <div className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3">
       <div className="flex items-center justify-between text-xs text-slate-500 mb-2 font-medium">
         <span>Ciclo de Vida do Chamado</span>
-        <span className="text-slate-400">Fluxo RBAC Integrado</span>
       </div>
       <div className="grid grid-cols-4 gap-2">
         {steps.map((step, idx) => {

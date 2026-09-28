@@ -136,15 +136,9 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-white sticky top-0 z-10">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-              Etapa 1 · Perfil: CSM / Relacionamento
-            </span>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 mt-1">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">
               Abertura de Chamado - Reporte de Erro (DC)
             </h2>
-            <p className="text-xs text-slate-500">
-              Preencha os campos obrigatórios do reporte de erro para envio à triagem do Analista/Supervisor.
-            </p>
           </div>
           <button
             onClick={onClose}

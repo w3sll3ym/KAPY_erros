@@ -9,6 +9,7 @@ import {
   Headphones,
   Layers,
   Shield,
+  Pencil,
 } from 'lucide-react';
 import { Ticket, TicketStatus } from '../types/workflow';
 import { StatusBadge } from './StatusBadge';
@@ -17,9 +18,14 @@ import { useWorkflow } from '../context/WorkflowContext';
 interface TicketKanbanProps {
   tickets: Ticket[];
   onSelectTicket: (ticket: Ticket) => void;
+  onEditTicket?: (ticket: Ticket) => void;
 }
 
-export const TicketKanban: React.FC<TicketKanbanProps> = ({ tickets, onSelectTicket }) => {
+export const TicketKanban: React.FC<TicketKanbanProps> = ({
+  tickets,
+  onSelectTicket,
+  onEditTicket,
+}) => {
   const { currentRole } = useWorkflow();
 
   const columns: {
@@ -160,6 +166,24 @@ export const TicketKanban: React.FC<TicketKanbanProps> = ({ tickets, onSelectTic
                           <span className="font-semibold">Pedido Analista: </span>
                           {ticket.missingInfoRequest.question}
                         </div>
+                      )}
+
+                      {ticket.status === 'INFORMACOES_FALTANDO' && currentRole === 'CSM' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onEditTicket) {
+                              onEditTicket(ticket);
+                            } else {
+                              onSelectTicket(ticket);
+                            }
+                          }}
+                          className="w-full mb-2 flex items-center justify-center gap-1.5 py-1.5 px-2 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-[11px] font-semibold transition-colors shadow-2xs cursor-pointer"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          <span>Editar Chamado</span>
+                        </button>
                       )}
 
                       {ticket.status === 'EM_CONTESTACAO_QUALIDADE' && ticket.contestJustification && (

@@ -47,11 +47,11 @@ export const PendingActionAlert: React.FC<PendingActionAlertProps> = ({
       icon = <Layers className="w-5 h-5 text-blue-600 shrink-0" />;
     }
   } else if (currentRole === 'QUALIDADE') {
-    count = metrics.emContestacaoQualidade;
+    count = metrics.aprovadosAnalista + metrics.reprovadosAnalista;
     if (count > 0) {
-      message = `${count} chamado(s) em contestação aguardando deliberação de QA`;
+      message = `${count} chamado(s) aguardando parecer final da Qualidade`;
       submessage =
-        'O Analista contestou os reportes. Avalie as evidências e emita o parecer conclusivo de Aprovação ou Reprovação.';
+        'Analise os erros encaminhados pelo Analista (aprovados ou reprovados) e dê o veredito final deliberando se aprova ou se reprova o erro.';
       borderColor = 'border-purple-300';
       bgColor = 'bg-purple-50/70';
       textColor = 'text-purple-900';

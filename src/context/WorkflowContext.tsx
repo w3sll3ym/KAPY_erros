@@ -66,7 +66,24 @@ interface WorkflowContextType {
   resubmitByCSM: (
     ticketId: string,
     responseNotes: string,
-    additionalAttachments?: Attachment[]
+    additionalAttachments?: Attachment[],
+    updatedFields?: {
+      analystCell?: string;
+      analystName?: string;
+      clientName?: string;
+      clientSegment?: string;
+      category?: string;
+      severity?: TicketSeverity;
+      analysisDate?: string;
+      documentList?: string;
+      errorReasonDC?: string;
+      impactedEmployeesCount?: number;
+      impactedCompetenciesCount?: number;
+      description?: string;
+      reproductionSteps?: string;
+      attachments?: Attachment[];
+      title?: string;
+    }
   ) => Promise<void>;
   approveByQuality: (ticketId: string, report: string) => Promise<void>;
   rejectByQuality: (ticketId: string, report: string) => Promise<void>;
@@ -441,16 +458,35 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
   const resubmitByCSM = async (
     ticketId: string,
     responseNotes: string,
-    additionalAttachments?: Attachment[]
+    additionalAttachments?: Attachment[],
+    updatedFields?: {
+      analystCell?: string;
+      analystName?: string;
+      clientName?: string;
+      clientSegment?: string;
+      category?: string;
+      severity?: TicketSeverity;
+      analysisDate?: string;
+      documentList?: string;
+      errorReasonDC?: string;
+      impactedEmployeesCount?: number;
+      impactedCompetenciesCount?: number;
+      description?: string;
+      reproductionSteps?: string;
+      attachments?: Attachment[];
+      title?: string;
+    }
   ) => {
     const ticket = tickets.find((t) => t.id === ticketId);
     if (!ticket) return;
 
     const timestamp = new Date().toISOString();
-    const mergedAttachments = [
-      ...ticket.attachments,
-      ...(additionalAttachments || []),
-    ];
+    const finalAttachments = updatedFields?.attachments !== undefined
+      ? updatedFields.attachments
+      : [
+          ...ticket.attachments,
+          ...(additionalAttachments || []),
+        ];
 
     const event: TimelineEvent = {
       id: `evt-${Date.now()}`,
@@ -458,9 +494,9 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
       authorRole: 'CSM',
       authorName: currentUser.name,
       actionType: 'RETORNO_INFO',
-      title: 'Informações Complementadas pelo CSM',
+      title: 'Chamado Editado & Reenviado pelo CSM',
       description:
-        'O CSM forneceu os esclarecimentos e evidências solicitadas. O chamado retornou para triagem do Analista.',
+        'O CSM editou os campos do chamado, ajustou as informações solicitadas pelo Analista e reenviou para a fila de triagem.',
       previousStatus: ticket.status,
       newStatus: 'NOVO_AGUARDANDO_TRIAGEM',
       notes: responseNotes,
@@ -468,13 +504,39 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     };
 
     const docRef = doc(db, TICKETS_COLLECTION, ticketId);
-    await updateDoc(docRef, {
+    const updatePayload: Record<string, any> = {
       status: 'NOVO_AGUARDANDO_TRIAGEM',
       updatedAt: timestamp,
-      attachments: mergedAttachments,
+      attachments: finalAttachments,
       missingInfoRequest: null,
+      contestJustification: null,
       timeline: [event, ...ticket.timeline],
-    });
+    };
+
+    if (updatedFields) {
+      if (updatedFields.analystCell !== undefined) updatePayload.analystCell = updatedFields.analystCell;
+      if (updatedFields.analystName !== undefined) updatePayload.analystName = updatedFields.analystName;
+      if (updatedFields.clientName !== undefined) updatePayload.clientName = updatedFields.clientName;
+      if (updatedFields.clientSegment !== undefined) updatePayload.clientSegment = updatedFields.clientSegment;
+      if (updatedFields.category !== undefined) updatePayload.category = updatedFields.category;
+      if (updatedFields.severity !== undefined) updatePayload.severity = updatedFields.severity;
+      if (updatedFields.analysisDate !== undefined) updatePayload.analysisDate = updatedFields.analysisDate;
+      if (updatedFields.documentList !== undefined) updatePayload.documentList = updatedFields.documentList;
+      if (updatedFields.errorReasonDC !== undefined) updatePayload.errorReasonDC = updatedFields.errorReasonDC;
+      if (updatedFields.impactedEmployeesCount !== undefined) updatePayload.impactedEmployeesCount = updatedFields.impactedEmployeesCount;
+      if (updatedFields.impactedCompetenciesCount !== undefined) updatePayload.impactedCompetenciesCount = updatedFields.impactedCompetenciesCount;
+      if (updatedFields.description !== undefined) updatePayload.description = updatedFields.description;
+      if (updatedFields.reproductionSteps !== undefined) updatePayload.reproductionSteps = updatedFields.reproductionSteps;
+
+      const newTitle = updatedFields.title || (
+        updatedFields.errorReasonDC && updatedFields.clientName
+          ? `${updatedFields.errorReasonDC} - ${updatedFields.clientName}`
+          : ticket.title
+      );
+      updatePayload.title = newTitle;
+    }
+
+    await updateDoc(docRef, updatePayload);
   };
 
   // 4a. Quality Approves (Qualidade -> Final) -> Updates Firebase

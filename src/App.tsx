@@ -8,6 +8,7 @@ import { TicketKanban } from './components/TicketKanban';
 import { TicketDetailDrawer } from './components/TicketDetailDrawer';
 import { NewTicketModal } from './components/NewTicketModal';
 import { WorkflowGuideModal } from './components/WorkflowGuideModal';
+import { ResubmitInfoModal } from './components/ActionModals';
 import { Ticket, TicketStatus, TicketSeverity, UserRole } from './types/workflow';
 import {
   Download,
@@ -44,11 +45,35 @@ const PAGE_METADATA: Record<
     targetStatus: 'INFORMACOES_FALTANDO',
     icon: <AlertCircle className="w-5 h-5 text-amber-600" />,
   },
+  csm_avaliados: {
+    title: 'Erros Avaliados (Analista & Qualidade)',
+    subtitle: 'Acompanhe os chamados que foram aprovados ou reprovados pelo Analista e aprovados pela Qualidade.',
+    targetStatus: [
+      'APROVADO_ANALISTA',
+      'REPROVADO_ANALISTA',
+      'EM_CONTESTACAO_QUALIDADE',
+      'APROVADO_QUALIDADE',
+      'REPROVADO_QUALIDADE',
+    ],
+    icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />,
+  },
   analista_reportados: {
-    title: 'Erros Reportados (Fila de Triagem)',
-    subtitle: 'Chamados reportados pelo CSM. Avalie e decida: contestar (retorna ao CSM), aprovar ou reprovar.',
-    targetStatus: 'NOVO_AGUARDANDO_TRIAGEM',
+    title: 'Erros Abertos',
+    subtitle: 'Chamados abertos sob gestão do Analista: novos aguardando triagem e contestados aguardando correção do CSM.',
+    targetStatus: ['NOVO_AGUARDANDO_TRIAGEM', 'INFORMACOES_FALTANDO'],
     icon: <Clock className="w-5 h-5 text-blue-600" />,
+  },
+  analista_finalizados: {
+    title: 'Erros Finalizados',
+    subtitle: 'Chamados triados e concluídos pelo Analista/Supervisor (aprovados ou reprovados com parecer da qualidade).',
+    targetStatus: [
+      'APROVADO_ANALISTA',
+      'REPROVADO_ANALISTA',
+      'EM_CONTESTACAO_QUALIDADE',
+      'APROVADO_QUALIDADE',
+      'REPROVADO_QUALIDADE',
+    ],
+    icon: <Archive className="w-5 h-5 text-emerald-600" />,
   },
   qualidade_aprovados: {
     title: 'Erros Aprovados',
@@ -85,16 +110,21 @@ const MainDashboard: React.FC = () => {
   const [isNewTicketOpen, setIsNewTicketOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
 
   // Sincroniza a página com o papel ativo (garantindo que cada perfil visualize apenas suas telas)
   // e fecha o modal de novo reporte se mudar para perfis sem permissão (ANALISTA ou QUALIDADE)
   React.useEffect(() => {
     if (currentRole === 'CSM') {
-      if (currentPage !== 'csm_reportados' && currentPage !== 'csm_contestados') {
+      if (
+        currentPage !== 'csm_reportados' &&
+        currentPage !== 'csm_contestados' &&
+        currentPage !== 'csm_avaliados'
+      ) {
         setCurrentPage('csm_reportados');
       }
     } else if (currentRole === 'ANALISTA') {
-      if (currentPage !== 'analista_reportados') {
+      if (currentPage !== 'analista_reportados' && currentPage !== 'analista_finalizados') {
         setCurrentPage('analista_reportados');
       }
     } else if (currentRole === 'QUALIDADE') {
@@ -140,8 +170,51 @@ const MainDashboard: React.FC = () => {
   // Filter application
   const filteredTickets = useMemo(() => {
     return tickets.filter((t) => {
-      // 0. Dedicated Page constraints
-      if (pageTargetStatus) {
+      // 0. Strict role & page boundaries
+      if (currentRole === 'ANALISTA') {
+        if (currentPage === 'analista_reportados') {
+          // Página "Erros Abertos": exibe exclusivamente chamados novos ou contestados aguardando correção do CSM
+          if (t.status !== 'NOVO_AGUARDANDO_TRIAGEM' && t.status !== 'INFORMACOES_FALTANDO') {
+            return false;
+          }
+        } else if (currentPage === 'analista_finalizados') {
+          // Página "Erros Finalizados": NUNCA exibe chamados novos nem contestados (INFORMACOES_FALTANDO)
+          if (t.status === 'NOVO_AGUARDANDO_TRIAGEM' || t.status === 'INFORMACOES_FALTANDO') {
+            return false;
+          }
+        }
+      } else if (currentRole === 'CSM') {
+        if (currentPage === 'csm_reportados') {
+          if (t.status !== 'NOVO_AGUARDANDO_TRIAGEM') {
+            return false;
+          }
+        } else if (currentPage === 'csm_contestados') {
+          if (t.status !== 'INFORMACOES_FALTANDO') {
+            return false;
+          }
+        } else if (currentPage === 'csm_avaliados') {
+          if (
+            t.status !== 'APROVADO_ANALISTA' &&
+            t.status !== 'REPROVADO_ANALISTA' &&
+            t.status !== 'EM_CONTESTACAO_QUALIDADE' &&
+            t.status !== 'APROVADO_QUALIDADE' &&
+            t.status !== 'REPROVADO_QUALIDADE'
+          ) {
+            return false;
+          }
+        }
+      } else if (currentRole === 'QUALIDADE') {
+        if (currentPage === 'qualidade_aprovados') {
+          if (t.status !== 'APROVADO_ANALISTA') return false;
+        } else if (currentPage === 'qualidade_reprovados') {
+          if (t.status !== 'REPROVADO_ANALISTA' && t.status !== 'EM_CONTESTACAO_QUALIDADE') return false;
+        } else if (currentPage === 'qualidade_finalizados') {
+          if (t.status !== 'APROVADO_QUALIDADE' && t.status !== 'REPROVADO_QUALIDADE') return false;
+        }
+      }
+
+      // Dedicated Page constraints (applied when no direct status filter card is selected)
+      if (pageTargetStatus && statusFilter === 'ALL') {
         if (Array.isArray(pageTargetStatus)) {
           if (!pageTargetStatus.includes(t.status)) return false;
         } else {
@@ -163,8 +236,18 @@ const MainDashboard: React.FC = () => {
       }
 
       // 2. Status filter
-      if (statusFilter !== 'ALL' && t.status !== statusFilter) {
-        return false;
+      if (statusFilter !== 'ALL') {
+        if (statusFilter === 'REPROVADO_ANALISTA') {
+          if (t.status !== 'REPROVADO_ANALISTA' && t.status !== 'EM_CONTESTACAO_QUALIDADE') {
+            return false;
+          }
+        } else if (statusFilter === 'APROVADO_QUALIDADE' && currentPage === 'analista_finalizados') {
+          if (t.status !== 'APROVADO_QUALIDADE' && t.status !== 'APROVADO_ANALISTA') {
+            return false;
+          }
+        } else if (t.status !== statusFilter) {
+          return false;
+        }
       }
 
       // 3. Client filter
@@ -217,6 +300,25 @@ const MainDashboard: React.FC = () => {
   };
 
   const handleSelectStatusFromMetric = (status: TicketStatus | 'ALL') => {
+    if (currentRole === 'ANALISTA') {
+      if (status === 'INFORMACOES_FALTANDO' || status === 'NOVO_AGUARDANDO_TRIAGEM') {
+        setCurrentPage('analista_reportados');
+      } else if (
+        status === 'APROVADO_QUALIDADE' ||
+        status === 'APROVADO_ANALISTA' ||
+        status === 'REPROVADO_ANALISTA'
+      ) {
+        setCurrentPage('analista_finalizados');
+      }
+    } else if (currentRole === 'CSM') {
+      if (status === 'NOVO_AGUARDANDO_TRIAGEM') {
+        setCurrentPage('csm_reportados');
+      } else if (status === 'INFORMACOES_FALTANDO') {
+        setCurrentPage('csm_contestados');
+      } else if (status !== 'ALL') {
+        setCurrentPage('csm_avaliados');
+      }
+    }
     if (statusFilter === status) {
       setStatusFilter('ALL');
     } else {
@@ -273,7 +375,10 @@ const MainDashboard: React.FC = () => {
       {/* Sidebar Component replacing the entire Header */}
       <Sidebar
         currentPage={currentPage}
-        onSelectPage={setCurrentPage}
+        onSelectPage={(page) => {
+          setCurrentPage(page);
+          setStatusFilter('ALL');
+        }}
         onOpenNewTicket={() => setIsNewTicketOpen(true)}
         onOpenGuide={() => setIsGuideOpen(true)}
         isMobileOpen={isMobileSidebarOpen}
@@ -354,6 +459,184 @@ const MainDashboard: React.FC = () => {
             onSelectStatusFilter={handleSelectStatusFromMetric}
           />
 
+          {/* Dedicated Status Filter Card for CSM Avaliados */}
+          {currentPage === 'csm_avaliados' && currentRole === 'CSM' && (
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    Situação dos Chamados Avaliados (Analista & Qualidade)
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Acompanhe os chamados aprovados ou reprovados pelo Analista e aprovados pela Qualidade:
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {statusFilter !== 'ALL' && (
+                    <button
+                      onClick={() => setStatusFilter('ALL')}
+                      className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-0.5 rounded bg-blue-50 border border-blue-200 transition-colors cursor-pointer"
+                    >
+                      Mostrar Todos os Avaliados
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* 1. Aprovados pelo Analista */}
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter(statusFilter === 'APROVADO_ANALISTA' ? 'ALL' : 'APROVADO_ANALISTA')}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    statusFilter === 'APROVADO_ANALISTA'
+                      ? 'bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/20 shadow-xs'
+                      : 'bg-slate-50/60 border-slate-200 hover:bg-blue-50/30 hover:border-blue-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900">
+                      <span className="w-2 h-2 rounded-full bg-blue-600" />
+                      Aprovados pelo Analista
+                    </span>
+                    <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                      {tickets.filter((t) => t.status === 'APROVADO_ANALISTA').length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-snug">
+                    Erros aprovados na triagem técnica do Analista que aguardam deliberação da Qualidade.
+                  </p>
+                </button>
+
+                {/* 2. Reprovados pelo Analista */}
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter(statusFilter === 'REPROVADO_ANALISTA' ? 'ALL' : 'REPROVADO_ANALISTA')}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    statusFilter === 'REPROVADO_ANALISTA'
+                      ? 'bg-orange-50/90 border-orange-400 ring-2 ring-orange-500/20 shadow-xs'
+                      : 'bg-slate-50/60 border-slate-200 hover:bg-orange-50/30 hover:border-orange-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-900">
+                      <span className="w-2 h-2 rounded-full bg-orange-500" />
+                      Reprovados pelo Analista
+                    </span>
+                    <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
+                      {tickets.filter((t) => t.status === 'REPROVADO_ANALISTA' || t.status === 'EM_CONTESTACAO_QUALIDADE').length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-snug">
+                    Erros reprovados na triagem técnica aguardando parecer final da Qualidade.
+                  </p>
+                </button>
+
+                {/* 3. Aprovados pela Qualidade */}
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter(statusFilter === 'APROVADO_QUALIDADE' ? 'ALL' : 'APROVADO_QUALIDADE')}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    statusFilter === 'APROVADO_QUALIDADE'
+                      ? 'bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-500/20 shadow-xs'
+                      : 'bg-slate-50/60 border-slate-200 hover:bg-emerald-50/30 hover:border-emerald-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+                      <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                      Aprovados pela Qualidade
+                    </span>
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                      {tickets.filter((t) => t.status === 'APROVADO_QUALIDADE').length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-snug">
+                    Erros com validação e parecer definitivo de aprovação emitido pela Qualidade.
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Dedicated Status Filter Card for Analista Finalizados */}
+          {currentPage === 'analista_finalizados' && (
+            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Archive className="w-4 h-4 text-emerald-600" />
+                    Status dos Erros Finalizados / Tratados pelo Analista
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Acompanhe a situação de cada erro após a triagem técnica. Clique nos blocos para filtrar:
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {statusFilter !== 'ALL' && (
+                    <button
+                      onClick={() => setStatusFilter('ALL')}
+                      className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-0.5 rounded bg-blue-50 border border-blue-200 transition-colors cursor-pointer"
+                    >
+                      Mostrar Todos os Finalizados
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* 1. Aprovado pelo analista */}
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter(statusFilter === 'APROVADO_ANALISTA' ? 'ALL' : 'APROVADO_ANALISTA')}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    statusFilter === 'APROVADO_ANALISTA'
+                      ? 'bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/20 shadow-xs'
+                      : 'bg-slate-50/60 border-slate-200 hover:bg-blue-50/30 hover:border-blue-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900">
+                      <span className="w-2 h-2 rounded-full bg-blue-600" />
+                      Aprovados pelo Analista
+                    </span>
+                    <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                      {tickets.filter((t) => t.status === 'APROVADO_ANALISTA' || t.status === 'APROVADO_QUALIDADE').length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-snug">
+                    Erros validados e aprovados tecnicamente pelo Analista encaminhados ou homologados pela Qualidade.
+                  </p>
+                </button>
+
+                {/* 2. Reprovado pelo analista e esperando parecer da qualidade */}
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter(statusFilter === 'REPROVADO_ANALISTA' ? 'ALL' : 'REPROVADO_ANALISTA')}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    statusFilter === 'REPROVADO_ANALISTA'
+                      ? 'bg-orange-50/90 border-orange-400 ring-2 ring-orange-500/20 shadow-xs'
+                      : 'bg-slate-50/60 border-slate-200 hover:bg-orange-50/30 hover:border-orange-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-900">
+                      <span className="w-2 h-2 rounded-full bg-orange-500" />
+                      Reprovados pelo Analista / Aguardando Parecer
+                    </span>
+                    <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
+                      {tickets.filter((t) => t.status === 'REPROVADO_ANALISTA' || t.status === 'EM_CONTESTACAO_QUALIDADE' || t.status === 'REPROVADO_QUALIDADE').length}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-snug">
+                    Reprovados na triagem técnica aguardando ou já tendo recebido parecer conclusivo da Qualidade.
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Filters & Search Bar */}
           <TicketFilters
             searchTerm={searchTerm}
@@ -392,11 +675,13 @@ const MainDashboard: React.FC = () => {
               tickets={filteredTickets}
               onSelectTicket={(t) => setSelectedTicketId(t.id)}
               onOpenNewTicket={currentRole === 'CSM' ? () => setIsNewTicketOpen(true) : undefined}
+              onEditTicket={(t) => setEditingTicket(t)}
             />
           ) : (
             <TicketKanban
               tickets={filteredTickets}
               onSelectTicket={(t) => setSelectedTicketId(t.id)}
+              onEditTicket={(t) => setEditingTicket(t)}
             />
           )}
         </main>
@@ -407,6 +692,16 @@ const MainDashboard: React.FC = () => {
         ticket={selectedTicket}
         onClose={() => setSelectedTicketId(null)}
       />
+
+      {/* Direct Edit / Resubmit Ticket Modal (CSM) */}
+      {editingTicket && (
+        <ResubmitInfoModal
+          isOpen={true}
+          ticket={editingTicket}
+          onClose={() => setEditingTicket(null)}
+          onSuccess={() => setEditingTicket(null)}
+        />
+      )}
 
       {/* New Ticket Modal */}
       <NewTicketModal

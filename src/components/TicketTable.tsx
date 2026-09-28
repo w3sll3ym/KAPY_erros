@@ -2,6 +2,8 @@ import React from 'react';
 import {
   Layers,
   Plus,
+  Pencil,
+  Shield,
 } from 'lucide-react';
 import { Ticket, UserRole } from '../types/workflow';
 import { StatusBadge } from './StatusBadge';
@@ -11,12 +13,14 @@ interface TicketTableProps {
   tickets: Ticket[];
   onSelectTicket: (ticket: Ticket) => void;
   onOpenNewTicket?: () => void;
+  onEditTicket?: (ticket: Ticket) => void;
 }
 
 export const TicketTable: React.FC<TicketTableProps> = ({
   tickets,
   onSelectTicket,
   onOpenNewTicket,
+  onEditTicket,
 }) => {
   const { currentRole, loading } = useWorkflow();
 
@@ -37,7 +41,13 @@ export const TicketTable: React.FC<TicketTableProps> = ({
   const getActionTargetRole = (status: string): UserRole | 'CONCLUIDO' => {
     if (status === 'NOVO_AGUARDANDO_TRIAGEM') return 'ANALISTA';
     if (status === 'INFORMACOES_FALTANDO') return 'CSM';
-    if (status === 'EM_CONTESTACAO_QUALIDADE') return 'QUALIDADE';
+    if (
+      status === 'APROVADO_ANALISTA' ||
+      status === 'REPROVADO_ANALISTA' ||
+      status === 'EM_CONTESTACAO_QUALIDADE'
+    ) {
+      return 'QUALIDADE';
+    }
     return 'CONCLUIDO';
   };
 
@@ -188,19 +198,49 @@ export const TicketTable: React.FC<TicketTableProps> = ({
 
                   {/* Action */}
                   <td className="py-3.5 px-4 text-right">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectTicket(ticket);
-                      }}
-                      className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                        isActionableForMe
-                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      <span>{isActionableForMe ? 'Agir' : 'Detalhes'}</span>
-                    </button>
+                    {currentRole === 'CSM' && ticket.status === 'INFORMACOES_FALTANDO' ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onEditTicket) {
+                            onEditTicket(ticket);
+                          } else {
+                            onSelectTicket(ticket);
+                          }
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-all cursor-pointer"
+                        title="Editar campos do chamado contestado"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        <span>Editar Chamado</span>
+                      </button>
+                    ) : currentRole === 'QUALIDADE' && isActionableForMe ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectTicket(ticket);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white shadow-xs transition-all cursor-pointer"
+                        title="Emitir veredito final da Qualidade"
+                      >
+                        <Shield className="w-3.5 h-3.5" />
+                        <span>Dar Veredito</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectTicket(ticket);
+                        }}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                          isActionableForMe
+                            ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        <span>{isActionableForMe ? 'Agir' : 'Detalhes'}</span>
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

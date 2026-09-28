@@ -21,7 +21,9 @@ import { UserRole, TicketStatus } from '../types/workflow';
 export type AppPage =
   | 'csm_reportados'
   | 'csm_contestados'
+  | 'csm_avaliados'
   | 'analista_reportados'
+  | 'analista_finalizados'
   | 'qualidade_aprovados'
   | 'qualidade_reprovados'
   | 'qualidade_finalizados';
@@ -55,11 +57,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Navigation items strictly mapped per user role
   const navItems = useMemo(() => {
     if (currentRole === 'CSM') {
+      const avaliadosCount = tickets.filter((t) =>
+        [
+          'APROVADO_ANALISTA',
+          'REPROVADO_ANALISTA',
+          'EM_CONTESTACAO_QUALIDADE',
+          'APROVADO_QUALIDADE',
+          'REPROVADO_QUALIDADE',
+        ].includes(t.status)
+      ).length;
+
       return [
         {
           id: 'csm_reportados' as AppPage,
           label: 'Erros Reportados',
-          sublabel: 'Abertos & Em andamento',
+          sublabel: 'Novos em Triagem',
           icon: <Clock className="w-4 h-4 text-blue-600" />,
           badgeCount: tickets.filter((t) => t.status === 'NOVO_AGUARDANDO_TRIAGEM').length,
           badgeColor: 'bg-blue-100 text-blue-800 font-bold',
@@ -72,18 +84,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
           badgeCount: metrics.informacoesFaltando,
           badgeColor: 'bg-amber-100 text-amber-800 font-bold',
         },
+        {
+          id: 'csm_avaliados' as AppPage,
+          label: 'Erros Avaliados',
+          sublabel: 'Aprovados & Reprovados',
+          icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />,
+          badgeCount: avaliadosCount,
+          badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
+        },
       ];
     }
 
     if (currentRole === 'ANALISTA') {
+      const abertosCount = tickets.filter(
+        (t) => t.status === 'NOVO_AGUARDANDO_TRIAGEM' || t.status === 'INFORMACOES_FALTANDO'
+      ).length;
+      const finalizadosCount = tickets.filter(
+        (t) => t.status !== 'NOVO_AGUARDANDO_TRIAGEM' && t.status !== 'INFORMACOES_FALTANDO'
+      ).length;
       return [
         {
           id: 'analista_reportados' as AppPage,
-          label: 'Erros Reportados',
-          sublabel: 'Fila de Triagem Técnica',
+          label: 'Erros Abertos',
+          sublabel: 'Novos & Contestados',
           icon: <Clock className="w-4 h-4 text-blue-600" />,
-          badgeCount: metrics.novoAguardandoTriagem,
+          badgeCount: abertosCount,
           badgeColor: 'bg-blue-100 text-blue-800 font-bold',
+        },
+        {
+          id: 'analista_finalizados' as AppPage,
+          label: 'Erros Finalizados',
+          sublabel: 'Tratados & Acompanhamento',
+          icon: <Archive className="w-4 h-4 text-emerald-600" />,
+          badgeCount: finalizadosCount,
+          badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
         },
       ];
     }
