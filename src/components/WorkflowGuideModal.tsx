@@ -59,7 +59,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
                 <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   O CSM registra o erro reportado pelo cliente com título, severidade, detalhes e evidências.
                 </p>
-                <div className="text-[11px] font-mono bg-white p-2 rounded border border-blue-200 text-blue-800">
+                <div className="text-[11px] font-semibold bg-white p-2 rounded border border-blue-200 text-blue-800">
                   Status: NOVO_AGUARDANDO_TRIAGEM
                 </div>
               </div>
@@ -134,7 +134,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
                 <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   Na tela de <em>Erros Contestados</em>, o CSM complementa as respostas e evidências solicitadas pelo Analista e reenvia à triagem.
                 </p>
-                <div className="text-[11px] font-mono bg-white p-2 rounded border border-amber-200 text-amber-800">
+                <div className="text-[11px] font-semibold bg-white p-2 rounded border border-amber-200 text-amber-800">
                   Retorna para: NOVO_AGUARDANDO_TRIAGEM
                 </div>
               </div>
@@ -196,7 +196,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
             </div>
             <div className="divide-y divide-slate-200 text-xs">
               <div className="grid grid-cols-12 p-3 bg-white hover:bg-slate-50 gap-2 items-center">
-                <div className="col-span-4 font-mono font-semibold text-blue-700">
+                <div className="col-span-4 font-semibold text-blue-700">
                   NOVO_AGUARDANDO_TRIAGEM
                 </div>
                 <div className="col-span-6 text-slate-600">
@@ -208,7 +208,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
               </div>
 
               <div className="grid grid-cols-12 p-3 bg-white hover:bg-slate-50 gap-2 items-center">
-                <div className="col-span-4 font-mono font-semibold text-amber-700">
+                <div className="col-span-4 font-semibold text-amber-700">
                   INFORMACOES_FALTANDO
                 </div>
                 <div className="col-span-6 text-slate-600">
@@ -220,7 +220,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
               </div>
 
               <div className="grid grid-cols-12 p-3 bg-white hover:bg-slate-50 gap-2 items-center">
-                <div className="col-span-4 font-mono font-semibold text-emerald-700">
+                <div className="col-span-4 font-semibold text-emerald-700">
                   APROVADO_ANALISTA
                 </div>
                 <div className="col-span-6 text-slate-600">
@@ -232,7 +232,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
               </div>
 
               <div className="grid grid-cols-12 p-3 bg-white hover:bg-slate-50 gap-2 items-center">
-                <div className="col-span-4 font-mono font-semibold text-purple-700">
+                <div className="col-span-4 font-semibold text-purple-700">
                   EM_CONTESTACAO_QUALIDADE
                 </div>
                 <div className="col-span-6 text-slate-600">
@@ -244,7 +244,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
               </div>
 
               <div className="grid grid-cols-12 p-3 bg-white hover:bg-slate-50 gap-2 items-center">
-                <div className="col-span-4 font-mono font-semibold text-teal-700">
+                <div className="col-span-4 font-semibold text-teal-700">
                   APROVADO_QUALIDADE
                 </div>
                 <div className="col-span-6 text-slate-600">
@@ -256,7 +256,7 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
               </div>
 
               <div className="grid grid-cols-12 p-3 bg-white hover:bg-slate-50 gap-2 items-center">
-                <div className="col-span-4 font-mono font-semibold text-rose-700">
+                <div className="col-span-4 font-semibold text-rose-700">
                   REPROVADO_QUALIDADE
                 </div>
                 <div className="col-span-6 text-slate-600">

@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   LayoutDashboard,
   Filter,
+  PanelLeftOpen,
 } from 'lucide-react';
 
 const PAGE_METADATA: Record<
@@ -35,8 +36,7 @@ const PAGE_METADATA: Record<
 > = {
   csm_reportados: {
     title: 'Erros Reportados',
-    subtitle: 'Chamados abertos pelo perfil de Relacionamento aguardando triagem técnica ou em andamento.',
-    targetStatus: ['NOVO_AGUARDANDO_TRIAGEM', 'APROVADO_ANALISTA', 'REPROVADO_ANALISTA'],
+    subtitle: 'Visão completa de todos os chamados reportados pelo perfil CSM (em andamento e finalizados).',
     icon: <Clock className="w-5 h-5 text-blue-600" />,
   },
   csm_contestados: {
@@ -148,6 +148,23 @@ const MainDashboard: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'ALL'>('ALL');
   const [clientFilter, setClientFilter] = useState<string>('ALL');
   const [isOnlyMyActionsActive, setIsOnlyMyActionsActive] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('nexus_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('nexus_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Selected ticket derived from current ticket pool
   const selectedTicket = useMemo(() => {
@@ -185,9 +202,7 @@ const MainDashboard: React.FC = () => {
         }
       } else if (currentRole === 'CSM') {
         if (currentPage === 'csm_reportados') {
-          if (t.status !== 'NOVO_AGUARDANDO_TRIAGEM') {
-            return false;
-          }
+          // Na página de erros reportados para o perfil CSM deve constar todos os chamados (inclusive os finalizados)
         } else if (currentPage === 'csm_contestados') {
           if (t.status !== 'INFORMACOES_FALTANDO') {
             return false;
@@ -383,10 +398,16 @@ const MainDashboard: React.FC = () => {
         onOpenGuide={() => setIsGuideOpen(true)}
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={handleToggleSidebar}
       />
 
-      {/* Main Content Area (Offset for desktop sidebar w-72) */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
+      {/* Main Content Area (Offset for desktop sidebar: w-72 or collapsed w-[72px]) */}
+      <div
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out ${
+          isSidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-72'
+        }`}
+      >
         {/* Mobile-only Top Bar with Hamburger */}
         <div className="lg:hidden flex items-center justify-between p-3.5 bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
           <button
@@ -403,7 +424,7 @@ const MainDashboard: React.FC = () => {
             <button
               onClick={() => setIsNewTicketOpen(true)}
               className="p-2 bg-blue-600 text-white rounded-lg shadow-xs cursor-pointer"
-              title="Novo Reporte"
+              title="Abrir Chamado"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -424,10 +445,22 @@ const MainDashboard: React.FC = () => {
 
           {/* Top Page Header (No header above this) */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                {activeMeta.title}
-              </h1>
+            <div className="flex items-center gap-3">
+              {isSidebarCollapsed && (
+                <button
+                  onClick={handleToggleSidebar}
+                  className="hidden lg:flex p-2 text-slate-600 hover:text-slate-900 hover:bg-white rounded-xl transition-colors cursor-pointer border border-slate-200 shadow-2xs bg-slate-50"
+                  title="Expandir barra lateral"
+                  aria-label="Expandir barra lateral"
+                >
+                  <PanelLeftOpen className="w-4 h-4" />
+                </button>
+              )}
+              <div>
+                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  {activeMeta.title}
+                </h1>
+              </div>
             </div>
 
             {/* Quick Actions on Page Header */}
@@ -447,7 +480,7 @@ const MainDashboard: React.FC = () => {
                   className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Novo Reporte</span>
+                  <span>Abrir Chamado</span>
                 </button>
               )}
             </div>
@@ -458,184 +491,6 @@ const MainDashboard: React.FC = () => {
             selectedStatusFilter={statusFilter}
             onSelectStatusFilter={handleSelectStatusFromMetric}
           />
-
-          {/* Dedicated Status Filter Card for CSM Avaliados */}
-          {currentPage === 'csm_avaliados' && currentRole === 'CSM' && (
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Situação dos Chamados Avaliados (Analista & Qualidade)
-                  </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Acompanhe os chamados aprovados ou reprovados pelo Analista e aprovados pela Qualidade:
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {statusFilter !== 'ALL' && (
-                    <button
-                      onClick={() => setStatusFilter('ALL')}
-                      className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-0.5 rounded bg-blue-50 border border-blue-200 transition-colors cursor-pointer"
-                    >
-                      Mostrar Todos os Avaliados
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* 1. Aprovados pelo Analista */}
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'APROVADO_ANALISTA' ? 'ALL' : 'APROVADO_ANALISTA')}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                    statusFilter === 'APROVADO_ANALISTA'
-                      ? 'bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/20 shadow-xs'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-blue-50/30 hover:border-blue-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900">
-                      <span className="w-2 h-2 rounded-full bg-blue-600" />
-                      Aprovados pelo Analista
-                    </span>
-                    <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-                      {tickets.filter((t) => t.status === 'APROVADO_ANALISTA').length}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Erros aprovados na triagem técnica do Analista que aguardam deliberação da Qualidade.
-                  </p>
-                </button>
-
-                {/* 2. Reprovados pelo Analista */}
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'REPROVADO_ANALISTA' ? 'ALL' : 'REPROVADO_ANALISTA')}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                    statusFilter === 'REPROVADO_ANALISTA'
-                      ? 'bg-orange-50/90 border-orange-400 ring-2 ring-orange-500/20 shadow-xs'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-orange-50/30 hover:border-orange-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-900">
-                      <span className="w-2 h-2 rounded-full bg-orange-500" />
-                      Reprovados pelo Analista
-                    </span>
-                    <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
-                      {tickets.filter((t) => t.status === 'REPROVADO_ANALISTA' || t.status === 'EM_CONTESTACAO_QUALIDADE').length}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Erros reprovados na triagem técnica aguardando parecer final da Qualidade.
-                  </p>
-                </button>
-
-                {/* 3. Aprovados pela Qualidade */}
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'APROVADO_QUALIDADE' ? 'ALL' : 'APROVADO_QUALIDADE')}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                    statusFilter === 'APROVADO_QUALIDADE'
-                      ? 'bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-500/20 shadow-xs'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-emerald-50/30 hover:border-emerald-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-900">
-                      <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                      Aprovados pela Qualidade
-                    </span>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                      {tickets.filter((t) => t.status === 'APROVADO_QUALIDADE').length}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Erros com validação e parecer definitivo de aprovação emitido pela Qualidade.
-                  </p>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Dedicated Status Filter Card for Analista Finalizados */}
-          {currentPage === 'analista_finalizados' && (
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-2xs space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                    <Archive className="w-4 h-4 text-emerald-600" />
-                    Status dos Erros Finalizados / Tratados pelo Analista
-                  </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Acompanhe a situação de cada erro após a triagem técnica. Clique nos blocos para filtrar:
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {statusFilter !== 'ALL' && (
-                    <button
-                      onClick={() => setStatusFilter('ALL')}
-                      className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold px-2 py-0.5 rounded bg-blue-50 border border-blue-200 transition-colors cursor-pointer"
-                    >
-                      Mostrar Todos os Finalizados
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* 1. Aprovado pelo analista */}
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'APROVADO_ANALISTA' ? 'ALL' : 'APROVADO_ANALISTA')}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                    statusFilter === 'APROVADO_ANALISTA'
-                      ? 'bg-blue-50/90 border-blue-400 ring-2 ring-blue-500/20 shadow-xs'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-blue-50/30 hover:border-blue-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-900">
-                      <span className="w-2 h-2 rounded-full bg-blue-600" />
-                      Aprovados pelo Analista
-                    </span>
-                    <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-                      {tickets.filter((t) => t.status === 'APROVADO_ANALISTA' || t.status === 'APROVADO_QUALIDADE').length}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Erros validados e aprovados tecnicamente pelo Analista encaminhados ou homologados pela Qualidade.
-                  </p>
-                </button>
-
-                {/* 2. Reprovado pelo analista e esperando parecer da qualidade */}
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter(statusFilter === 'REPROVADO_ANALISTA' ? 'ALL' : 'REPROVADO_ANALISTA')}
-                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                    statusFilter === 'REPROVADO_ANALISTA'
-                      ? 'bg-orange-50/90 border-orange-400 ring-2 ring-orange-500/20 shadow-xs'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-orange-50/30 hover:border-orange-200'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-900">
-                      <span className="w-2 h-2 rounded-full bg-orange-500" />
-                      Reprovados pelo Analista / Aguardando Parecer
-                    </span>
-                    <span className="text-xs font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full">
-                      {tickets.filter((t) => t.status === 'REPROVADO_ANALISTA' || t.status === 'EM_CONTESTACAO_QUALIDADE' || t.status === 'REPROVADO_QUALIDADE').length}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 leading-snug">
-                    Reprovados na triagem técnica aguardando ou já tendo recebido parecer conclusivo da Qualidade.
-                  </p>
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Filters & Search Bar */}
           <TicketFilters

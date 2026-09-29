@@ -56,10 +56,10 @@ export const TicketTable: React.FC<TicketTableProps> = ({
       <div className="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-2xs">
         <div className="w-10 h-10 rounded-full border-2 border-blue-600 border-t-transparent animate-spin mx-auto mb-3" />
         <h3 className="text-sm font-bold text-slate-800">
-          Carregando dados do Firebase Firestore...
+          Carregando chamados...
         </h3>
         <p className="text-xs text-slate-500 mt-1">
-          Sincronizando registros da coleção tickets em tempo real.
+          Buscando registros atualizados.
         </p>
       </div>
     );
@@ -72,12 +72,12 @@ export const TicketTable: React.FC<TicketTableProps> = ({
           <Layers className="w-6 h-6 text-blue-600" />
         </div>
         <h3 className="text-sm font-bold text-slate-800">
-          Nenhum chamado no banco de dados Firebase
+          Nenhum chamado encontrado
         </h3>
         <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto mb-4">
           {onOpenNewTicket
-            ? 'A base de dados real está pronta e vazia, sem dados fictícios. Comece criando o primeiro reporte de erro.'
-            : 'A base de dados real está pronta. Novos reportes são abertos exclusivamente pela equipe de CSM para triagem.'}
+            ? 'Nenhum chamado registrado nesta fila. Comece criando o primeiro chamado.'
+            : 'Nenhum chamado registrado nesta fila.'}
         </p>
         {onOpenNewTicket ? (
           <button
@@ -85,7 +85,7 @@ export const TicketTable: React.FC<TicketTableProps> = ({
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Criar Primeiro Reporte</span>
+            <span>Abrir Chamado</span>
           </button>
         ) : (
           <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 font-medium bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
@@ -125,7 +125,7 @@ export const TicketTable: React.FC<TicketTableProps> = ({
                   }`}
                 >
                   {/* Code */}
-                  <td className="py-3.5 px-4 font-mono font-semibold text-slate-800 shrink-0">
+                  <td className="py-3.5 px-4 font-semibold text-slate-800 shrink-0">
                     <div className="flex items-center gap-1.5">
                       {isActionableForMe && (
                         <span
@@ -247,10 +247,6 @@ export const TicketTable: React.FC<TicketTableProps> = ({
             })}
           </tbody>
         </table>
-      </div>
-      <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200 text-[11px] text-slate-500 flex items-center justify-between">
-        <span>Mostrando {tickets.length} chamado(s) armazenado(s) no Firestore</span>
-        <span>Sincronização em tempo real ativa</span>
       </div>
     </div>
   );

@@ -58,7 +58,7 @@ export const RequestInfoModal: React.FC<{
               <h3 className="text-sm font-bold text-slate-900">
                 Solicitar Mais Informações ao CSM
               </h3>
-              <span className="text-[11px] text-amber-800 font-mono">
+              <span className="text-[11px] text-amber-800">
                 {ticket.code} · Devolver para esclarecimento
               </span>
             </div>
@@ -158,7 +158,7 @@ export const ContestModal: React.FC<{
               <h3 className="text-sm font-bold text-slate-900">
                 Contestar Chamado (Faltam Informações)
               </h3>
-              <span className="text-[11px] text-amber-800 font-mono">
+              <span className="text-[11px] text-amber-800">
                 {ticket.code} · Devolver ao perfil CSM / Relacionamento
               </span>
             </div>
@@ -258,7 +258,7 @@ export const RejectByAnalystModal: React.FC<{
               <h3 className="text-sm font-bold text-slate-900">
                 Reprovar Chamado & Encaminhar à Qualidade
               </h3>
-              <span className="text-[11px] text-orange-800 font-mono">
+              <span className="text-[11px] text-orange-800">
                 {ticket.code} · Parecer do Analista / Supervisor
               </span>
             </div>
@@ -449,7 +449,7 @@ export const ResubmitInfoModal: React.FC<{
               <h3 className="text-sm sm:text-base font-bold text-slate-900">
                 Editar Chamado Contestado & Devolver à Triagem
               </h3>
-              <span className="text-[11px] text-blue-800 font-mono">
+              <span className="text-[11px] text-blue-800">
                 {ticket.code} · Edição e Correção de Informações pelo CSM
               </span>
             </div>
@@ -642,7 +642,7 @@ export const ResubmitInfoModal: React.FC<{
                 value={documentList}
                 onChange={(e) => setDocumentList(e.target.value)}
                 placeholder="Relacione os documentos analisados (ex: Espelho de Ponto Março/2026, Holerites Lote 04, Relatório de Rubricas 102/103)..."
-                className="w-full text-xs p-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed font-mono"
+                className="w-full text-xs p-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 leading-relaxed"
               />
             </div>
 
@@ -670,7 +670,7 @@ export const ResubmitInfoModal: React.FC<{
                 value={reproductionSteps}
                 onChange={(e) => setReproductionSteps(e.target.value)}
                 placeholder="1. Acessar tela X... 2. Filtrar por... 3. Clicar em calcular..."
-                className="w-full text-xs p-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono text-xs"
+                className="w-full text-xs p-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
               />
             </div>
           </div>
@@ -830,7 +830,7 @@ export const QualityVerdictModal: React.FC<{
                   : 'Reprovação Conclusiva pela Qualidade'}
               </h3>
               <span
-                className={`text-[11px] font-mono ${
+                className={`text-[11px] ${
                   isApproval ? 'text-teal-800' : 'text-rose-800'
                 }`}
               >

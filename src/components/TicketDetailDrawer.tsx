@@ -164,10 +164,9 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
           <div className="p-4 sm:p-5 border-b border-slate-200 bg-white shrink-0">
           <div className="flex items-center justify-between gap-3 mb-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+              <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                 {currentTicket.code}
               </span>
-              <StatusBadge status={currentTicket.status} size="sm" />
             </div>
 
             <div className="flex items-center gap-1">
@@ -184,7 +183,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
               <button
                 onClick={() => setShowConfirmDelete(!showConfirmDelete)}
                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                title="Excluir do Firebase"
+                title="Excluir chamado"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -199,7 +198,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
 
           {showConfirmDelete && (
             <div className="p-3 mb-2 bg-rose-50 border border-rose-200 rounded-lg flex items-center justify-between text-xs text-rose-900">
-              <span>Deseja remover este chamado permanentemente do Firestore?</span>
+              <span>Deseja remover este chamado permanentemente?</span>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowConfirmDelete(false)}
@@ -245,7 +244,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
             <p className="italic text-slate-800 leading-relaxed pl-6">
               "{currentTicket.missingInfoRequest.question}"
             </p>
-            <span className="block text-[10px] text-amber-700 pl-6 mt-1 font-mono">
+            <span className="block text-[10px] text-amber-700 pl-6 mt-1">
               Solicitado em: {formatDate(currentTicket.missingInfoRequest.requestedAt)}
             </span>
           </div>
@@ -260,7 +259,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
             <p className="italic text-slate-800 leading-relaxed pl-6">
               "{currentTicket.contestJustification.reason}"
             </p>
-            <span className="block text-[10px] text-purple-700 pl-6 mt-1 font-mono">
+            <span className="block text-[10px] text-purple-700 pl-6 mt-1">
               Enviado à Qualidade em: {formatDate(currentTicket.contestJustification.contestedAt)}
             </span>
           </div>
@@ -275,7 +274,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
             <p className="text-slate-800 leading-relaxed pl-6">
               {currentTicket.analystReview.notes}
             </p>
-            <span className="block text-[10px] text-blue-700 pl-6 mt-1 font-mono">
+            <span className="block text-[10px] text-blue-700 pl-6 mt-1">
               Aguardando análise e homologação da equipe de Qualidade.
             </span>
           </div>
@@ -290,7 +289,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
             <p className="italic text-slate-800 leading-relaxed pl-6">
               "{currentTicket.analystReview.notes}"
             </p>
-            <span className="block text-[10px] text-orange-700 pl-6 mt-1 font-mono">
+            <span className="block text-[10px] text-orange-700 pl-6 mt-1">
               Aguardando parecer final da equipe de Qualidade (se aprova o chamado ou se confirma a reprovação).
             </span>
           </div>
@@ -320,119 +319,92 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
           </div>
         )}
 
-        {/* CONTEXTUAL ACTION BAR (Based on active role & ticket status) */}
-        <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/90">
-          {/* Action Set 1: ANALISTA on NOVO_AGUARDANDO_TRIAGEM */}
-          {currentRole === 'ANALISTA' && currentTicket.status === 'NOVO_AGUARDANDO_TRIAGEM' && (
-            <div className="space-y-3">
-              {!showDirectApprovePrompt ? (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <button
-                    onClick={() => setShowDirectApprovePrompt(true)}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Aprovar Erro</span>
-                  </button>
-
-                  <button
-                    onClick={() => setIsContestOpen(true)}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                  >
-                    <HelpCircle className="w-3.5 h-3.5" />
-                    <span>Contestar (Faltam Info)</span>
-                  </button>
-
-                  <button
-                    onClick={() => setIsRejectOpen(true)}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                  >
-                    <XCircle className="w-3.5 h-3.5" />
-                    <span>Reprovar Erro</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="p-3 bg-white border border-blue-300 rounded-lg space-y-2">
-                  <span className="text-xs font-bold text-blue-900 block">
-                    Confirmar Aprovação Técnica (Encaminhar à Qualidade)
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Observação técnica (opcional: 'Bug reproduzido com sucesso na versão de homologação')..."
-                    value={directApproveNotes}
-                    onChange={(e) => setDirectApproveNotes(e.target.value)}
-                    className="w-full text-xs p-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                  <div className="flex justify-end gap-2">
+        {/* CONTEXTUAL ACTION BAR (Only shown when it's the active role's turn to take action) */}
+        {isMyTurn && responsibleRole !== 'CONCLUIDO' && (
+          <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/90">
+            {/* Action Set 1: ANALISTA on NOVO_AGUARDANDO_TRIAGEM */}
+            {currentRole === 'ANALISTA' && currentTicket.status === 'NOVO_AGUARDANDO_TRIAGEM' && (
+              <div className="space-y-3">
+                {!showDirectApprovePrompt ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <button
-                      onClick={() => setShowDirectApprovePrompt(false)}
-                      className="px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                      onClick={() => setShowDirectApprovePrompt(true)}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
                     >
-                      Voltar
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Aprovar Erro</span>
                     </button>
+
                     <button
-                      onClick={handleDirectApprove}
-                      disabled={isActionLoading}
-                      className="px-3 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded shadow-xs flex items-center gap-1 cursor-pointer"
+                      onClick={() => setIsContestOpen(true)}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
                     >
-                      {isActionLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      <span>Confirmar e Enviar à Qualidade</span>
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>Contestar (Faltam Info)</span>
+                    </button>
+
+                    <button
+                      onClick={() => setIsRejectOpen(true)}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                    >
+                      <XCircle className="w-3.5 h-3.5" />
+                      <span>Reprovar Erro</span>
                     </button>
                   </div>
+                ) : (
+                  <div className="p-3 bg-white border border-blue-300 rounded-lg space-y-2">
+                    <span className="text-xs font-bold text-blue-900 block">
+                      Confirmar Aprovação Técnica (Encaminhar à Qualidade)
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="Observação técnica (opcional: 'Bug reproduzido com sucesso na versão de homologação')..."
+                      value={directApproveNotes}
+                      onChange={(e) => setDirectApproveNotes(e.target.value)}
+                      className="w-full text-xs p-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setShowDirectApprovePrompt(false)}
+                        className="px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
+                      >
+                        Voltar
+                      </button>
+                      <button
+                        onClick={handleDirectApprove}
+                        disabled={isActionLoading}
+                        className="px-3 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded shadow-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        {isActionLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                        <span>Confirmar e Enviar à Qualidade</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Set 2: CSM on INFORMACOES_FALTANDO */}
+            {currentRole === 'CSM' && currentTicket.status === 'INFORMACOES_FALTANDO' && (
+              <div className="space-y-2">
+                <div className="p-3 bg-amber-50/90 border border-amber-200 rounded-lg text-xs text-amber-900 leading-relaxed">
+                  <strong>Chamado Contestado pelo Analista:</strong> Faltam dados ou evidências. Você pode editar todas as informações dos campos do chamado (dados do cliente, motivo DC, colaboradores, competências, documentos, descrição, passo a passo e anexos) e reenviar à triagem técnica.
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Action Set 2: CSM on INFORMACOES_FALTANDO */}
-          {currentRole === 'CSM' && currentTicket.status === 'INFORMACOES_FALTANDO' && (
-            <div className="space-y-2">
-              <div className="p-3 bg-amber-50/90 border border-amber-200 rounded-lg text-xs text-amber-900 leading-relaxed">
-                <strong>Chamado Contestado pelo Analista:</strong> Faltam dados ou evidências. Você pode editar todas as informações dos campos do chamado (dados do cliente, motivo DC, colaboradores, competências, documentos, descrição, passo a passo e anexos) e reenviar à triagem técnica.
-              </div>
-              <button
-                onClick={() => setIsResubmitOpen(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-              >
-                <Pencil className="w-4 h-4" />
-                <span>Editar Chamado e Devolver à Triagem</span>
-              </button>
-            </div>
-          )}
-
-          {/* Action Set 3: QUALIDADE on APROVADO_ANALISTA */}
-          {currentRole === 'QUALIDADE' && currentTicket.status === 'APROVADO_ANALISTA' && (
-            <div className="space-y-2">
-              <p className="text-xs text-slate-600">
-                Como especialista de Qualidade, analise o erro aprovado pelo Analista e valide a decisão final:
-              </p>
-              <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => setQualityVerdictType('APROVAR')}
-                  className="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                  onClick={() => setIsResubmitOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Homologar Aprovação (Final)</span>
-                </button>
-
-                <button
-                  onClick={() => setQualityVerdictType('REPROVAR')}
-                  className="flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                >
-                  <XCircle className="w-4 h-4" />
-                  <span>Reprovar Erro (Final)</span>
+                  <Pencil className="w-4 h-4" />
+                  <span>Editar Chamado e Devolver à Triagem</span>
                 </button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Action Set 4: QUALIDADE on REPROVADO_ANALISTA or EM_CONTESTACAO_QUALIDADE */}
-          {currentRole === 'QUALIDADE' &&
-            (currentTicket.status === 'REPROVADO_ANALISTA' ||
-              currentTicket.status === 'EM_CONTESTACAO_QUALIDADE') && (
+            {/* Action Set 3: QUALIDADE on APROVADO_ANALISTA */}
+            {currentRole === 'QUALIDADE' && currentTicket.status === 'APROVADO_ANALISTA' && (
               <div className="space-y-2">
                 <p className="text-xs text-slate-600">
-                  Como especialista de Qualidade, emita o parecer final deliberando se aprova o chamado ou se confirma a reprovação:
+                  Como especialista de Qualidade, analise o erro aprovado pelo Analista e valide a decisão final:
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -440,7 +412,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                     className="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Aprovar Chamado (Parecer Final)</span>
+                    <span>Homologar Aprovação (Final)</span>
                   </button>
 
                   <button
@@ -448,40 +420,41 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                     className="flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
                   >
                     <XCircle className="w-4 h-4" />
-                    <span>Confirmar Reprovação (Parecer Final)</span>
+                    <span>Reprovar Erro (Final)</span>
                   </button>
                 </div>
               </div>
             )}
 
-          {/* If the current role does NOT have actions on this status */}
-          {!isMyTurn && (
-            <div className="p-3 bg-white rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <span className="text-xs font-bold text-slate-800">
-                  {responsibleRole === 'CONCLUIDO'
-                    ? 'Chamado Concluído (Estado Final)'
-                    : `Aguardando ação da equipe: ${STATUS_CONFIG[currentTicket.status].responsibleLabel}`}
-                </span>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  {responsibleRole === 'CONCLUIDO'
-                    ? 'Este chamado foi homologado no Firebase e não permite novas transições de fluxo.'
-                    : `Para simular a decisão técnica necessária, você pode alternar seu papel.`}
-                </p>
-              </div>
+            {/* Action Set 4: QUALIDADE on REPROVADO_ANALISTA or EM_CONTESTACAO_QUALIDADE */}
+            {currentRole === 'QUALIDADE' &&
+              (currentTicket.status === 'REPROVADO_ANALISTA' ||
+                currentTicket.status === 'EM_CONTESTACAO_QUALIDADE') && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-600">
+                    Como especialista de Qualidade, emita o parecer final deliberando se aprova o chamado ou se confirma a reprovação:
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setQualityVerdictType('APROVAR')}
+                      className="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Aprovar Chamado (Parecer Final)</span>
+                    </button>
 
-              {responsibleRole !== 'CONCLUIDO' && (
-                <button
-                  onClick={() => setCurrentRole(responsibleRole as UserRole)}
-                  className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg border border-blue-200 transition-colors flex items-center gap-1"
-                >
-                  <span>Alternar para {responsibleRole}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                    <button
+                      onClick={() => setQualityVerdictType('REPROVAR')}
+                      className="flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      <span>Confirmar Reprovação (Parecer Final)</span>
+                    </button>
+                  </div>
+                </div>
               )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Tab Switcher */}
         <div className="sticky top-0 z-10 flex border-b border-slate-200 px-5 bg-white text-xs shadow-2xs">
@@ -644,7 +617,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                       <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1">
                         Listagem de Documentos
                       </span>
-                      <p className="text-xs text-slate-800 whitespace-pre-line leading-relaxed font-mono">
+                      <p className="text-xs text-slate-800 whitespace-pre-line leading-relaxed">
                         {currentTicket.documentList}
                       </p>
                     </div>
@@ -668,7 +641,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                   <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
                     Passo a Passo de Reprodução
                   </h4>
-                  <pre className="p-3 bg-slate-900 text-slate-100 rounded-lg text-xs leading-relaxed font-mono whitespace-pre-wrap">
+                  <pre className="p-3 bg-slate-900 text-slate-100 rounded-lg text-xs leading-relaxed whitespace-pre-wrap font-sans">
                     {currentTicket.reproductionSteps}
                   </pre>
                 </div>
@@ -723,7 +696,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs text-slate-500 pb-1">
                 <span>Trilha de Auditoria Cronológica</span>
-                <span className="font-mono text-[11px]">
+                <span className="text-[11px] font-medium text-slate-500">
                   {currentTicket.timeline.length} registro(s)
                 </span>
               </div>
@@ -752,7 +725,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                           <span className="font-bold text-slate-800">
                             {evt.title}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
+                          <span className="text-[10px] text-slate-400">
                             {formatDate(evt.timestamp)}
                           </span>
                         </div>
@@ -831,7 +804,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                         <span className="font-semibold text-slate-700">
                           {c.authorName} ({c.authorRole})
                         </span>
-                        <span className="font-mono">{formatDate(c.timestamp)}</span>
+                        <span>{formatDate(c.timestamp)}</span>
                       </div>
                       <p className="text-slate-800">{c.description}</p>
                     </div>

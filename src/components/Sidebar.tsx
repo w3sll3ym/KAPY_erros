@@ -14,6 +14,8 @@ import {
   UserCheck,
   X,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { UserRole, TicketStatus } from '../types/workflow';
@@ -35,6 +37,8 @@ interface SidebarProps {
   onOpenGuide: () => void;
   isMobileOpen: boolean;
   onCloseMobile: () => void;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -44,6 +48,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenGuide,
   isMobileOpen,
   onCloseMobile,
+  isCollapsed = false,
+  onToggleCollapse,
 }) => {
   const {
     currentRole,
@@ -71,26 +77,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           id: 'csm_reportados' as AppPage,
           label: 'Erros Reportados',
-          sublabel: 'Novos em Triagem',
-          icon: <Clock className="w-4 h-4 text-blue-600" />,
-          badgeCount: tickets.filter((t) => t.status === 'NOVO_AGUARDANDO_TRIAGEM').length,
-          badgeColor: 'bg-blue-100 text-blue-800 font-bold',
+          sublabel: 'Todos os Chamados',
+          icon: <Clock className="w-4 h-4 text-white" />,
+          badgeCount: metrics.total,
+          badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
         },
         {
           id: 'csm_contestados' as AppPage,
           label: 'Erros Contestados',
           sublabel: 'Informações Faltando',
-          icon: <AlertCircle className="w-4 h-4 text-amber-600" />,
+          icon: <AlertCircle className="w-4 h-4 text-white" />,
           badgeCount: metrics.informacoesFaltando,
-          badgeColor: 'bg-amber-100 text-amber-800 font-bold',
+          badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
         },
         {
           id: 'csm_avaliados' as AppPage,
           label: 'Erros Avaliados',
           sublabel: 'Aprovados & Reprovados',
-          icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />,
+          icon: <CheckCircle2 className="w-4 h-4 text-white" />,
           badgeCount: avaliadosCount,
-          badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
+          badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
         },
       ];
     }
@@ -107,17 +113,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'analista_reportados' as AppPage,
           label: 'Erros Abertos',
           sublabel: 'Novos & Contestados',
-          icon: <Clock className="w-4 h-4 text-blue-600" />,
+          icon: <Clock className="w-4 h-4 text-white" />,
           badgeCount: abertosCount,
-          badgeColor: 'bg-blue-100 text-blue-800 font-bold',
+          badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
         },
         {
           id: 'analista_finalizados' as AppPage,
           label: 'Erros Finalizados',
           sublabel: 'Tratados & Acompanhamento',
-          icon: <Archive className="w-4 h-4 text-emerald-600" />,
+          icon: <Archive className="w-4 h-4 text-white" />,
           badgeCount: finalizadosCount,
-          badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
+          badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
         },
       ];
     }
@@ -128,25 +134,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
         id: 'qualidade_aprovados' as AppPage,
         label: 'Erros Aprovados',
         sublabel: 'Aguardando Análise da Qualidade',
-        icon: <CheckCircle2 className="w-4 h-4 text-blue-600" />,
+        icon: <CheckCircle2 className="w-4 h-4 text-white" />,
         badgeCount: metrics.aprovadosAnalista,
-        badgeColor: 'bg-blue-100 text-blue-800 font-bold',
+        badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
       },
       {
         id: 'qualidade_reprovados' as AppPage,
         label: 'Erros Reprovados',
         sublabel: 'Para Parecer Final (Aprovar/Reprovar)',
-        icon: <AlertTriangle className="w-4 h-4 text-orange-600" />,
+        icon: <AlertTriangle className="w-4 h-4 text-white" />,
         badgeCount: metrics.reprovadosAnalista,
-        badgeColor: 'bg-orange-100 text-orange-800 font-bold',
+        badgeColor: 'bg-orange-500/20 text-orange-300 border border-orange-500/30',
       },
       {
         id: 'qualidade_finalizados' as AppPage,
         label: 'Erros Finalizados',
         sublabel: 'Consolidado Concluídos',
-        icon: <Archive className="w-4 h-4 text-emerald-600" />,
+        icon: <Archive className="w-4 h-4 text-white" />,
         badgeCount: metrics.finalizadosTotal,
-        badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
+        badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
       },
     ];
   }, [currentRole, metrics, tickets]);
@@ -164,25 +170,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
       role: 'CSM',
       label: 'CSM (Relacionamento)',
       team: 'Contas & Sucesso',
-      icon: <Headphones className="w-4 h-4 text-amber-600" />,
+      icon: <Headphones className="w-4 h-4 text-white" />,
       pendingCount: metrics.informacoesFaltando,
-      badgeColor: 'bg-amber-100 text-amber-800',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
     },
     {
       role: 'ANALISTA',
       label: 'Analista / Supervisor',
       team: 'Triagem Técnica N2',
-      icon: <Layers className="w-4 h-4 text-blue-600" />,
+      icon: <Layers className="w-4 h-4 text-white" />,
       pendingCount: metrics.novoAguardandoTriagem,
-      badgeColor: 'bg-blue-100 text-blue-800',
+      badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
     },
     {
       role: 'QUALIDADE',
       label: 'Qualidade (QA)',
       team: 'Auditoria & Arbitragem',
-      icon: <Shield className="w-4 h-4 text-purple-600" />,
+      icon: <Shield className="w-4 h-4 text-white" />,
       pendingCount: metrics.aprovadosAnalista + metrics.reprovadosAnalista,
-      badgeColor: 'bg-purple-100 text-purple-800',
+      badgeColor: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
     },
   ];
 
@@ -214,70 +220,120 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#0b132b] text-slate-100 border-r border-slate-800/80 flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0 ${
+          isCollapsed ? 'w-72 lg:w-[72px]' : 'w-72'
+        } ${
           isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
         {/* Brand Header */}
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
-              <Layers className="w-5 h-5 text-blue-400" />
+        <div
+          className={`border-b border-white/[0.08] flex items-center bg-[#0b132b] transition-all ${
+            isCollapsed
+              ? 'p-3 justify-center'
+              : 'px-4 py-3.5 justify-between'
+          }`}
+        >
+          {!isCollapsed && (
+            <div className="truncate">
+              <span className="font-bold text-white tracking-tight text-sm block leading-tight truncate">
+                KAPY OPs
+              </span>
+              <span className="text-[11px] text-slate-400 font-normal block leading-tight truncate mt-0.5">
+                Report de Erros
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-slate-900 tracking-tight text-base">
-                  Nexus QA
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Tratamento de Erros
-              </p>
-            </div>
-          </div>
+          )}
 
-          <button
-            onClick={onCloseMobile}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg lg:hidden"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Action buttons (Minimize button for desktop & Close for mobile) */}
+          <div className="flex items-center gap-1">
+            {onToggleCollapse && (
+              <button
+                onClick={onToggleCollapse}
+                className="hidden lg:flex p-1.5 text-white hover:bg-white/[0.12] rounded-lg transition-colors cursor-pointer"
+                title={isCollapsed ? 'Expandir menu lateral' : 'Minimizar menu lateral'}
+                aria-label={isCollapsed ? 'Expandir menu lateral' : 'Minimizar menu lateral'}
+              >
+                {isCollapsed ? (
+                  <PanelLeftOpen className="w-4 h-4 text-white" />
+                ) : (
+                  <PanelLeftClose className="w-4 h-4 text-white" />
+                )}
+              </button>
+            )}
+
+            <button
+              onClick={onCloseMobile}
+              className="p-1.5 text-white hover:bg-white/[0.12] rounded-lg lg:hidden cursor-pointer"
+              aria-label="Fechar menu"
+            >
+              <X className="w-4 h-4 text-white" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation Sections */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-6">
+        <div className={`flex-1 overflow-y-auto p-3 space-y-5 ${isCollapsed ? 'px-2' : ''}`}>
           {/* Main Pages */}
           <div>
-            <span className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-              Páginas & Filas de Trabalho
-            </span>
+            {!isCollapsed && (
+              <span className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400/80 block mb-1.5">
+                Filas de Trabalho
+              </span>
+            )}
             <nav className="space-y-1">
               {navItems.map((item) => {
                 const isActive = currentPage === item.id;
+
+                if (isCollapsed) {
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handlePageClick(item.id)}
+                      title={`${item.label} ${
+                        typeof item.badgeCount === 'number' ? `(${item.badgeCount})` : ''
+                      } - ${item.sublabel}`}
+                      className={`w-full flex items-center justify-center p-2 rounded-lg text-xs font-medium transition-all cursor-pointer relative group ${
+                        isActive
+                          ? 'bg-blue-600/20 text-white font-semibold border border-blue-500/30'
+                          : 'text-white hover:bg-white/[0.08]'
+                      }`}
+                    >
+                      <span className="text-white scale-105 transition-transform flex items-center justify-center">
+                        {item.icon}
+                      </span>
+                      {typeof item.badgeCount === 'number' && item.badgeCount > 0 && (
+                        <span className="absolute top-1 right-1 min-w-3.5 h-3.5 px-1 flex items-center justify-center text-[8px] font-bold rounded-full bg-blue-500 text-white shadow-xs">
+                          {item.badgeCount > 99 ? '99+' : item.badgeCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                }
+
                 return (
                   <button
                     key={item.id}
                     onClick={() => handlePageClick(item.id)}
-                    className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer group ${
                       isActive
-                        ? 'bg-blue-50 text-blue-900 font-bold shadow-2xs border border-blue-200/80'
-                        : 'text-slate-700 hover:bg-slate-100/80 hover:text-slate-900'
+                        ? 'bg-blue-600/20 text-white font-semibold border border-blue-500/30 shadow-xs'
+                        : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 truncate">
-                      <span className={isActive ? 'text-blue-600' : 'text-slate-400'}>
+                      <span className="text-white shrink-0 flex items-center justify-center">
                         {item.icon}
                       </span>
-                      <div className="text-left truncate">
-                        <span className="block truncate">{item.label}</span>
-                        <span className="text-[10px] text-slate-400 font-normal block truncate">
-                          {item.sublabel}
-                        </span>
-                      </div>
+                      <span className="truncate">{item.label}</span>
                     </div>
-                    {typeof item.badgeCount === 'number' && (
+                    {typeof item.badgeCount === 'number' && item.badgeCount > 0 && (
                       <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ml-2 ${item.badgeColor}`}
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
+                          isActive
+                            ? 'bg-blue-500/30 text-blue-200'
+                            : 'bg-white/10 text-slate-300'
+                        }`}
                       >
                         {item.badgeCount}
                       </span>
@@ -290,70 +346,88 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Quick Guide / Help */}
           <div>
-            <span className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
-              Processo & Regras
-            </span>
+            {!isCollapsed && (
+              <span className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400/80 block mb-1.5">
+                Processo
+              </span>
+            )}
             <button
               onClick={() => {
                 onOpenGuide();
                 onCloseMobile();
               }}
-              className="w-full flex items-center gap-2.5 p-2.5 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer"
+              title="Guia do Workflow - Matriz de transições e papéis"
+              className={`w-full flex items-center px-2.5 py-2 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer group ${
+                isCollapsed ? 'justify-center p-2' : 'gap-2.5'
+              }`}
             >
-              <BookOpen className="w-4 h-4 text-slate-500" />
-              <div className="text-left">
-                <span className="block font-semibold">Guia do Workflow</span>
-                <span className="text-[10px] text-slate-400 font-normal block">
-                  Matriz de transições e papéis
-                </span>
-              </div>
+              <BookOpen className="w-4 h-4 text-white shrink-0 group-hover:scale-105 transition-transform" />
+              {!isCollapsed && (
+                <span className="truncate">Guia do Workflow</span>
+              )}
             </button>
           </div>
 
           {/* RBAC Persona Selector Section */}
-          <div className="pt-2 border-t border-slate-100">
-            <div className="px-2.5 mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Simular Papel (RBAC)
-              </span>
-            </div>
+          <div className="pt-2 border-t border-white/[0.08]">
+            {!isCollapsed && (
+              <div className="px-2.5 mb-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400/80">
+                  Simular Papel
+                </span>
+              </div>
+            )}
 
             <div className="space-y-1">
               {rolesList.map((r) => {
                 const isSelected = currentRole === r.role;
+
+                if (isCollapsed) {
+                  return (
+                    <button
+                      key={r.role}
+                      onClick={() => handleSelectRole(r.role)}
+                      title={`${r.label} (${r.team}) ${
+                        r.pendingCount > 0 ? `· ${r.pendingCount} pendente(s)` : ''
+                      }`}
+                      className={`w-full flex items-center justify-center p-2 rounded-lg text-xs transition-all cursor-pointer relative group ${
+                        isSelected
+                          ? 'bg-white/15 text-white font-semibold shadow-xs ring-1 ring-white/20'
+                          : 'text-white hover:bg-white/[0.08]'
+                      }`}
+                    >
+                      <span className="text-white scale-105 transition-transform shrink-0 flex items-center justify-center">
+                        {r.icon}
+                      </span>
+                      {r.pendingCount > 0 && (
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-400 ring-2 ring-[#0b132b]" />
+                      )}
+                    </button>
+                  );
+                }
+
                 return (
                   <button
                     key={r.role}
                     onClick={() => handleSelectRole(r.role)}
-                    className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-all cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer group ${
                       isSelected
-                        ? 'bg-slate-900 text-white font-semibold shadow-xs'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-white/10 text-white font-semibold border border-white/15 shadow-xs'
+                        : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <span className={isSelected ? 'text-blue-300' : ''}>
+                      <span className="text-white shrink-0 flex items-center justify-center">
                         {r.icon}
                       </span>
-                      <div className="text-left truncate">
-                        <span className="block text-xs leading-tight truncate">
-                          {r.label}
-                        </span>
-                        <span
-                          className={`text-[10px] font-normal leading-tight block truncate ${
-                            isSelected ? 'text-slate-400' : 'text-slate-400'
-                          }`}
-                        >
-                          {r.team}
-                        </span>
-                      </div>
+                      <span className="truncate">{r.label}</span>
                     </div>
 
                     {r.pendingCount > 0 && (
                       <span
-                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
+                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${
                           isSelected
-                            ? 'bg-blue-500 text-white'
+                            ? 'bg-white/20 text-white'
                             : r.badgeColor
                         }`}
                         title={`${r.pendingCount} chamado(s) aguardando`}

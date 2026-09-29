@@ -27,10 +27,10 @@ export const MetricsCards: React.FC<MetricsCardsProps> = ({
       return [
         {
           id: 'csm_reportados',
-          status: 'NOVO_AGUARDANDO_TRIAGEM' as TicketStatus,
+          status: 'ALL' as const,
           label: 'Erros Reportados',
-          value: metrics.novoAguardandoTriagem,
-          sublabel: 'Aguardando triagem técnica',
+          value: metrics.total,
+          sublabel: 'Visão geral de todos os chamados',
           icon: <Clock className="w-5 h-5 text-blue-600" />,
           accentColor: 'border-blue-200 hover:border-blue-400',
           activeColor: 'ring-2 ring-blue-600 bg-blue-50/50',

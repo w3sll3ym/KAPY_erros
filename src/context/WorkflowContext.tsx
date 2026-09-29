@@ -30,6 +30,7 @@ interface WorkflowContextType {
   currentUser: UserProfile;
   metrics: {
     total: number;
+    abertosTotal: number;
     novoAguardandoTriagem: number;
     informacoesFaltando: number;
     emContestacaoQualidade: number;
@@ -206,6 +207,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     const aprovadosTotal = aprovadosAnalista + aprovadosQualidade;
     const finalizadosTotal = aprovadosQualidade + reprovadosQualidade;
+    const abertosTotal = total - finalizadosTotal;
     const taxaAprovacao =
       finalizadosTotal > 0 ? Math.round((aprovadosQualidade / finalizadosTotal) * 100) : 0;
 
@@ -220,6 +222,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     return {
       total,
+      abertosTotal,
       novoAguardandoTriagem,
       informacoesFaltando,
       emContestacaoQualidade,

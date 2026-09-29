@@ -12,7 +12,6 @@ import {
   Pencil,
 } from 'lucide-react';
 import { Ticket, TicketStatus } from '../types/workflow';
-import { StatusBadge } from './StatusBadge';
 import { useWorkflow } from '../context/WorkflowContext';
 
 interface TicketKanbanProps {
@@ -133,7 +132,7 @@ export const TicketKanban: React.FC<TicketKanbanProps> = ({
                     >
                       {/* Top Header of Card */}
                       <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
-                        <span className="font-mono text-[11px] font-bold text-slate-700">
+                        <span className="text-[11px] font-bold text-slate-700 tracking-tight">
                           {ticket.code}
                         </span>
                         {ticket.analystCell && (
@@ -194,8 +193,7 @@ export const TicketKanban: React.FC<TicketKanbanProps> = ({
                       )}
 
                       {/* Footer */}
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
-                        <StatusBadge status={ticket.status} size="sm" />
+                      <div className="flex items-center justify-end pt-2 border-t border-slate-100 text-[11px]">
                         <span className="text-slate-400 group-hover:text-blue-600 flex items-center gap-0.5 font-medium transition-colors">
                           Ver <ArrowRight className="w-3 h-3" />
                         </span>
