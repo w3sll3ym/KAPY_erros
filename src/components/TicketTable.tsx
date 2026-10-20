@@ -41,11 +41,7 @@ export const TicketTable: React.FC<TicketTableProps> = ({
   const getActionTargetRole = (status: string): UserRole | 'CONCLUIDO' => {
     if (status === 'NOVO_AGUARDANDO_TRIAGEM') return 'ANALISTA';
     if (status === 'INFORMACOES_FALTANDO') return 'CSM';
-    if (
-      status === 'APROVADO_ANALISTA' ||
-      status === 'REPROVADO_ANALISTA' ||
-      status === 'EM_CONTESTACAO_QUALIDADE'
-    ) {
+    if (status === 'REPROVADO_ANALISTA' || status === 'EM_CONTESTACAO_QUALIDADE') {
       return 'QUALIDADE';
     }
     return 'CONCLUIDO';

@@ -20,6 +20,7 @@ import {
   TimelineEvent,
 } from '../types/workflow';
 import { USER_PROFILES } from '../data/statusConfig';
+import { SIMULATED_ACCOUNTS } from '../data/authUsers';
 
 interface WorkflowContextType {
   tickets: Ticket[];
@@ -28,6 +29,9 @@ interface WorkflowContextType {
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
   currentUser: UserProfile;
+  isAuthenticated: boolean;
+  login: (emailOrRole: string, password?: string) => Promise<boolean>;
+  logout: () => void;
   metrics: {
     total: number;
     abertosTotal: number;
@@ -94,6 +98,7 @@ interface WorkflowContextType {
 }
 
 const ROLE_KEY = 'nexus_qa_active_role_v1';
+const AUTH_KEY = 'kapy_auth_session_v1';
 const TICKETS_COLLECTION = 'tickets';
 
 const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined);
@@ -102,6 +107,14 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(AUTH_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
 
   const [currentRole, setCurrentRoleState] = useState<UserRole>(() => {
     try {
@@ -178,6 +191,69 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   };
 
+  const login = async (emailOrRole: string, password?: string): Promise<boolean> => {
+    const input = emailOrRole.trim().toLowerCase();
+    let targetRole: UserRole | null = null;
+
+    if (
+      input === 'csm' ||
+      input === 'csm@kapy.com' ||
+      input === 'mariana.silva@empresa.com' ||
+      input.includes('mariana')
+    ) {
+      targetRole = 'CSM';
+    } else if (
+      input === 'analista' ||
+      input === 'analista@kapy.com' ||
+      input === 'carlos.mendes@empresa.com' ||
+      input.includes('carlos')
+    ) {
+      targetRole = 'ANALISTA';
+    } else if (
+      input === 'qualidade' ||
+      input === 'qa' ||
+      input === 'qualidade@kapy.com' ||
+      input === 'beatriz.lima@empresa.com' ||
+      input.includes('beatriz')
+    ) {
+      targetRole = 'QUALIDADE';
+    }
+
+    if (!targetRole) {
+      return false;
+    }
+
+    if (password && password.trim() !== '') {
+      const expectedPassword = SIMULATED_ACCOUNTS[targetRole].passwordHint;
+      if (
+        password.trim() !== expectedPassword &&
+        password.trim() !== '123' &&
+        password.trim() !== 'admin'
+      ) {
+        return false;
+      }
+    }
+
+    setCurrentRoleState(targetRole);
+    setIsAuthenticated(true);
+    try {
+      localStorage.setItem(ROLE_KEY, targetRole);
+      localStorage.setItem(AUTH_KEY, 'true');
+    } catch {
+      // ignore
+    }
+    return true;
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    try {
+      localStorage.removeItem(AUTH_KEY);
+    } catch {
+      // ignore
+    }
+  };
+
   const currentUser = useMemo(() => USER_PROFILES[currentRole], [currentRole]);
 
   // Metrics calculation
@@ -206,10 +282,10 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     ).length;
 
     const aprovadosTotal = aprovadosAnalista + aprovadosQualidade;
-    const finalizadosTotal = aprovadosQualidade + reprovadosQualidade;
+    const finalizadosTotal = aprovadosAnalista + aprovadosQualidade + reprovadosQualidade;
     const abertosTotal = total - finalizadosTotal;
     const taxaAprovacao =
-      finalizadosTotal > 0 ? Math.round((aprovadosQualidade / finalizadosTotal) * 100) : 0;
+      finalizadosTotal > 0 ? Math.round((aprovadosTotal / finalizadosTotal) * 100) : 0;
 
     let pendingForCurrentRole = 0;
     if (currentRole === 'ANALISTA') {
@@ -217,7 +293,8 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     } else if (currentRole === 'CSM') {
       pendingForCurrentRole = informacoesFaltando;
     } else if (currentRole === 'QUALIDADE') {
-      pendingForCurrentRole = aprovadosAnalista + reprovadosAnalista;
+      // Qualidade só precisa dar o veredito quando o analista reprovar o erro
+      pendingForCurrentRole = reprovadosAnalista;
     }
 
     return {
@@ -357,9 +434,9 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
       authorRole: 'ANALISTA',
       authorName: currentUser.name,
       actionType: 'APROVACAO_ANALISTA',
-      title: 'Erro Aprovado pelo Analista · Encaminhado à Qualidade',
+      title: 'Erro Aprovado pelo Analista · Concluído',
       description:
-        'O Analista/Supervisor validou e aprovou tecnicamente o erro. Encaminhado para análise e validação da equipe de Qualidade.',
+        'O Analista/Supervisor validou e aprovou tecnicamente o erro. Chamado concluído diretamente, sem necessidade de homologação da Qualidade.',
       previousStatus: ticket.status,
       newStatus: 'APROVADO_ANALISTA',
       notes,
@@ -652,6 +729,9 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
         currentRole,
         setCurrentRole,
         currentUser,
+        isAuthenticated,
+        login,
+        logout,
         metrics,
         createTicket,
         requestMoreInfo,

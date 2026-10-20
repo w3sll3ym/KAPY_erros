@@ -135,7 +135,6 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
   if (currentTicket.status === 'NOVO_AGUARDANDO_TRIAGEM') responsibleRole = 'ANALISTA';
   if (currentTicket.status === 'INFORMACOES_FALTANDO') responsibleRole = 'CSM';
   if (
-    currentTicket.status === 'APROVADO_ANALISTA' ||
     currentTicket.status === 'REPROVADO_ANALISTA' ||
     currentTicket.status === 'EM_CONTESTACAO_QUALIDADE'
   ) {
@@ -266,16 +265,16 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
         )}
 
         {currentTicket.status === 'APROVADO_ANALISTA' && currentTicket.analystReview && (
-          <div className="mx-4 sm:mx-5 mt-3 p-3 bg-blue-50 border border-blue-300 rounded-lg text-xs text-blue-900 shadow-2xs">
-            <div className="flex items-center gap-2 font-bold mb-1">
-              <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+          <div className="mx-4 sm:mx-5 mt-3 p-3 bg-emerald-50 border border-emerald-300 rounded-lg text-xs text-emerald-950 shadow-2xs">
+            <div className="flex items-center gap-2 font-bold mb-1 text-emerald-900">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Aprovado pelo Analista ({currentTicket.analystReview.analystName}):</span>
             </div>
             <p className="text-slate-800 leading-relaxed pl-6">
               {currentTicket.analystReview.notes}
             </p>
-            <span className="block text-[10px] text-blue-700 pl-6 mt-1">
-              Aguardando análise e homologação da equipe de Qualidade.
+            <span className="block text-[10px] text-emerald-700 pl-6 mt-1 font-medium">
+              Chamado concluído diretamente. Não requer homologação da Qualidade.
             </span>
           </div>
         )}
@@ -352,16 +351,19 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                     </button>
                   </div>
                 ) : (
-                  <div className="p-3 bg-white border border-blue-300 rounded-lg space-y-2">
-                    <span className="text-xs font-bold text-blue-900 block">
-                      Confirmar Aprovação Técnica (Encaminhar à Qualidade)
+                  <div className="p-3 bg-white border border-emerald-300 rounded-lg space-y-2">
+                    <span className="text-xs font-bold text-emerald-900 block">
+                      Confirmar Aprovação do Erro (Conclusivo)
                     </span>
+                    <p className="text-[11px] text-slate-500">
+                      O chamado será validado e concluído diretamente, sem necessidade de homologação da Qualidade.
+                    </p>
                     <input
                       type="text"
                       placeholder="Observação técnica (opcional: 'Bug reproduzido com sucesso na versão de homologação')..."
                       value={directApproveNotes}
                       onChange={(e) => setDirectApproveNotes(e.target.value)}
-                      className="w-full text-xs p-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full text-xs p-2 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     />
                     <div className="flex justify-end gap-2">
                       <button
@@ -373,10 +375,10 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                       <button
                         onClick={handleDirectApprove}
                         disabled={isActionLoading}
-                        className="px-3 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded shadow-xs flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded shadow-xs flex items-center gap-1 cursor-pointer"
                       >
                         {isActionLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                        <span>Confirmar e Enviar à Qualidade</span>
+                        <span>Confirmar Aprovação</span>
                       </button>
                     </div>
                   </div>
@@ -397,32 +399,6 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                   <Pencil className="w-4 h-4" />
                   <span>Editar Chamado e Devolver à Triagem</span>
                 </button>
-              </div>
-            )}
-
-            {/* Action Set 3: QUALIDADE on APROVADO_ANALISTA */}
-            {currentRole === 'QUALIDADE' && currentTicket.status === 'APROVADO_ANALISTA' && (
-              <div className="space-y-2">
-                <p className="text-xs text-slate-600">
-                  Como especialista de Qualidade, analise o erro aprovado pelo Analista e valide a decisão final:
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setQualityVerdictType('APROVAR')}
-                    className="flex items-center justify-center gap-2 px-3 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Homologar Aprovação (Final)</span>
-                  </button>
-
-                  <button
-                    onClick={() => setQualityVerdictType('REPROVAR')}
-                    className="flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    <span>Reprovar Erro (Final)</span>
-                  </button>
-                </div>
               </div>
             )}
 

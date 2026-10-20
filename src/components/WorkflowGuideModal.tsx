@@ -97,12 +97,12 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
                     <span><strong>Contestar</strong> → Retorna ao CSM por falta de dados</span>
                   </li>
                   <li className="flex items-start gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
-                    <span><strong>Aprovar</strong> → Vai para Qualidade analisar</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                    <span><strong>Aprovar</strong> → Concluído diretamente (não requer homologação da Qualidade)</span>
                   </li>
                   <li className="flex items-start gap-1">
                     <ShieldAlert className="w-3.5 h-3.5 text-orange-600 mt-0.5 shrink-0" />
-                    <span><strong>Reprovar</strong> → Vai para Qualidade dar parecer final</span>
+                    <span><strong>Reprovar</strong> → Vai para a Qualidade dar o veredito final</span>
                   </li>
                 </ul>
               </div>
@@ -155,22 +155,22 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
                   </span>
                 </div>
                 <h3 className="font-semibold text-slate-900 text-sm mb-1">
-                  Auditoria & Parecer Final
+                  Veredito da Qualidade
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed mb-3">
-                  A Qualidade atua em telas dedicadas para Erros Aprovados, Erros Reprovados (emite o parecer final) e Erros Finalizados:
+                  A Qualidade só precisa dar o veredito quando o Analista reprova um erro aberto pelo CSM:
                 </p>
                 <ul className="text-xs space-y-1.5 text-slate-700">
                   <li className="flex items-start gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
-                    <span><strong>Erros Aprovados</strong> → Análise e homologação</span>
-                  </li>
-                  <li className="flex items-start gap-1">
                     <AlertTriangle className="w-3.5 h-3.5 text-orange-600 mt-0.5 shrink-0" />
-                    <span><strong>Erros Reprovados</strong> → Parecer final (aprova ou reprova)</span>
+                    <span><strong>Erros Reprovados</strong> → Veredito: aprova o chamado ou confirma a reprovação</span>
                   </li>
                   <li className="flex items-start gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 mt-0.5 shrink-0" />
+                    <span><strong>Erros Aprovados</strong> → Concluídos diretamente pelo Analista (dispensa homologação)</span>
+                  </li>
+                  <li className="flex items-start gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-600 mt-0.5 shrink-0" />
                     <span><strong>Erros Finalizados</strong> → Histórico consolidado</span>
                   </li>
                 </ul>

@@ -56,21 +56,21 @@ export const TicketKanban: React.FC<TicketKanbanProps> = ({
     },
     {
       id: 'qualidade',
-      title: 'Análise da Qualidade',
-      subtitle: 'Aprovados & Reprovados',
+      title: 'Veredito da Qualidade',
+      subtitle: 'Erros reprovados para parecer',
       responsibleTeam: 'Qualidade (QA)',
-      icon: <Shield className="w-4 h-4 text-purple-600" />,
-      color: 'border-t-4 border-t-purple-500 bg-slate-100/70',
-      statuses: ['APROVADO_ANALISTA', 'REPROVADO_ANALISTA', 'EM_CONTESTACAO_QUALIDADE'],
+      icon: <Shield className="w-4 h-4 text-orange-600" />,
+      color: 'border-t-4 border-t-orange-500 bg-slate-100/70',
+      statuses: ['REPROVADO_ANALISTA', 'EM_CONTESTACAO_QUALIDADE'],
     },
     {
       id: 'finalizados',
       title: 'Finalizados & Concluídos',
-      subtitle: 'Parecer final encerrado',
+      subtitle: 'Aprovados & Reprovados',
       responsibleTeam: 'Histórico Permanente',
       icon: <CheckCircle2 className="w-4 h-4 text-emerald-600" />,
       color: 'border-t-4 border-t-emerald-500 bg-slate-100/70',
-      statuses: ['APROVADO_QUALIDADE', 'REPROVADO_QUALIDADE'],
+      statuses: ['APROVADO_ANALISTA', 'APROVADO_QUALIDADE', 'REPROVADO_QUALIDADE'],
     },
   ];
 

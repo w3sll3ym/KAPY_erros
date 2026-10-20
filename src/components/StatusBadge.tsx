@@ -95,16 +95,17 @@ export const WorkflowStepper: React.FC<{ status: TicketStatus }> = ({ status }) 
       title: '3. Qualidade',
       actor: 'Auditoria QA',
       isCompleted:
-        status === 'APROVADO_QUALIDADE' || status === 'REPROVADO_QUALIDADE',
+        status === 'APROVADO_QUALIDADE' ||
+        status === 'REPROVADO_QUALIDADE' ||
+        status === 'APROVADO_ANALISTA',
       isActive:
-        status === 'APROVADO_ANALISTA' ||
         status === 'REPROVADO_ANALISTA' ||
         status === 'EM_CONTESTACAO_QUALIDADE',
       sublabel:
         status === 'APROVADO_ANALISTA'
-          ? 'Análise de erro'
-          : status === 'REPROVADO_ANALISTA'
-          ? 'Parecer final'
+          ? 'Dispensa homologação'
+          : status === 'REPROVADO_ANALISTA' || status === 'EM_CONTESTACAO_QUALIDADE'
+          ? 'Veredito final'
           : undefined,
     },
     {
@@ -112,9 +113,11 @@ export const WorkflowStepper: React.FC<{ status: TicketStatus }> = ({ status }) 
       title: '4. Conclusão',
       actor: 'Final',
       isCompleted:
-        status === 'APROVADO_QUALIDADE' || status === 'REPROVADO_QUALIDADE',
+        status === 'APROVADO_ANALISTA' ||
+        status === 'APROVADO_QUALIDADE' ||
+        status === 'REPROVADO_QUALIDADE',
       isActive: false,
-      isSuccess: status === 'APROVADO_QUALIDADE',
+      isSuccess: status === 'APROVADO_ANALISTA' || status === 'APROVADO_QUALIDADE',
       isRejected: status === 'REPROVADO_QUALIDADE',
     },
   ];

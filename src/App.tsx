@@ -9,6 +9,8 @@ import { TicketDetailDrawer } from './components/TicketDetailDrawer';
 import { NewTicketModal } from './components/NewTicketModal';
 import { WorkflowGuideModal } from './components/WorkflowGuideModal';
 import { ResubmitInfoModal } from './components/ActionModals';
+import { NotificationBell } from './components/NotificationBell';
+import { LoginScreen } from './components/LoginScreen';
 import { Ticket, TicketStatus, TicketSeverity, UserRole } from './types/workflow';
 import {
   Download,
@@ -23,6 +25,7 @@ import {
   LayoutDashboard,
   Filter,
   PanelLeftOpen,
+  LogOut,
 } from 'lucide-react';
 
 const PAGE_METADATA: Record<
@@ -75,33 +78,42 @@ const PAGE_METADATA: Record<
     ],
     icon: <Archive className="w-5 h-5 text-emerald-600" />,
   },
-  qualidade_aprovados: {
-    title: 'Erros Aprovados',
-    subtitle: 'Chamados aprovados pelo Analista/Supervisor aguardando análise técnica e homologação da Qualidade.',
-    targetStatus: 'APROVADO_ANALISTA',
-    icon: <CheckCircle2 className="w-5 h-5 text-blue-600" />,
-  },
   qualidade_reprovados: {
-    title: 'Erros Reprovados',
+    title: 'Erros Reprovados (Para Veredito)',
     subtitle: 'Chamados reprovados pelo Analista/Supervisor para a Qualidade dar parecer final (aprovar ou reprovar).',
     targetStatus: ['REPROVADO_ANALISTA', 'EM_CONTESTACAO_QUALIDADE'],
     icon: <AlertTriangle className="w-5 h-5 text-orange-600" />,
   },
+  qualidade_aprovados: {
+    title: 'Erros Aprovados',
+    subtitle: 'Chamados aprovados diretamente pelo Analista (concluídos sem necessidade de homologação da Qualidade).',
+    targetStatus: 'APROVADO_ANALISTA',
+    icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />,
+  },
   qualidade_finalizados: {
     title: 'Erros Finalizados',
     subtitle: 'Visão consolidada de todos os erros que já tiveram parecer conclusivo finalizado.',
-    targetStatus: ['APROVADO_QUALIDADE', 'REPROVADO_QUALIDADE'],
+    targetStatus: ['APROVADO_ANALISTA', 'APROVADO_QUALIDADE', 'REPROVADO_QUALIDADE'],
     icon: <Archive className="w-5 h-5 text-emerald-600" />,
   },
 };
 
 const MainDashboard: React.FC = () => {
-  const { tickets, currentRole, setCurrentRole, loading, error } = useWorkflow();
+  const {
+    tickets,
+    currentRole,
+    setCurrentRole,
+    currentUser,
+    isAuthenticated,
+    logout,
+    loading,
+    error,
+  } = useWorkflow();
 
   const getDefaultPage = (role: UserRole): AppPage => {
     if (role === 'CSM') return 'csm_reportados';
     if (role === 'ANALISTA') return 'analista_reportados';
-    return 'qualidade_aprovados';
+    return 'qualidade_reprovados';
   };
 
   // Active page state in Sidebar
@@ -133,7 +145,7 @@ const MainDashboard: React.FC = () => {
         currentPage !== 'qualidade_reprovados' &&
         currentPage !== 'qualidade_finalizados'
       ) {
-        setCurrentPage('qualidade_aprovados');
+        setCurrentPage('qualidade_reprovados');
       }
     }
 
@@ -224,7 +236,13 @@ const MainDashboard: React.FC = () => {
         } else if (currentPage === 'qualidade_reprovados') {
           if (t.status !== 'REPROVADO_ANALISTA' && t.status !== 'EM_CONTESTACAO_QUALIDADE') return false;
         } else if (currentPage === 'qualidade_finalizados') {
-          if (t.status !== 'APROVADO_QUALIDADE' && t.status !== 'REPROVADO_QUALIDADE') return false;
+          if (
+            t.status !== 'APROVADO_ANALISTA' &&
+            t.status !== 'APROVADO_QUALIDADE' &&
+            t.status !== 'REPROVADO_QUALIDADE'
+          ) {
+            return false;
+          }
         }
       }
 
@@ -280,7 +298,6 @@ const MainDashboard: React.FC = () => {
         }
         if (
           currentRole === 'QUALIDADE' &&
-          t.status !== 'APROVADO_ANALISTA' &&
           t.status !== 'REPROVADO_ANALISTA' &&
           t.status !== 'EM_CONTESTACAO_QUALIDADE'
         ) {
@@ -385,6 +402,17 @@ const MainDashboard: React.FC = () => {
 
   const activeMeta = PAGE_METADATA[currentPage];
 
+  if (!isAuthenticated) {
+    return (
+      <LoginScreen
+        onLoginSuccess={(role) => {
+          setCurrentPage(getDefaultPage(role));
+          setStatusFilter('ALL');
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-900 flex">
       {/* Sidebar Component replacing the entire Header */}
@@ -420,15 +448,34 @@ const MainDashboard: React.FC = () => {
           <div className="flex items-center gap-1.5 font-bold text-slate-900 text-sm">
             <span>{activeMeta.title}</span>
           </div>
-          {currentRole === 'CSM' && (
+          <div className="flex items-center gap-2">
+            {currentRole === 'CSM' && (
+              <NotificationBell
+                onSelectTicket={(ticketId) => setSelectedTicketId(ticketId)}
+                onNavigateContestados={() => {
+                  setCurrentPage('csm_contestados');
+                  setStatusFilter('ALL');
+                }}
+              />
+            )}
+            {currentRole === 'CSM' && (
+              <button
+                onClick={() => setIsNewTicketOpen(true)}
+                className="p-2 bg-blue-600 text-white rounded-lg shadow-xs cursor-pointer"
+                title="Abrir Chamado"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            )}
             <button
-              onClick={() => setIsNewTicketOpen(true)}
-              className="p-2 bg-blue-600 text-white rounded-lg shadow-xs cursor-pointer"
-              title="Abrir Chamado"
+              onClick={logout}
+              className="p-2 text-slate-500 hover:text-rose-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+              title="Sair da conta"
+              aria-label="Sair da conta"
             >
-              <Plus className="w-4 h-4" />
+              <LogOut className="w-4 h-4" />
             </button>
-          )}
+          </div>
         </div>
 
         {/* Page Main Content */}
@@ -465,6 +512,16 @@ const MainDashboard: React.FC = () => {
 
             {/* Quick Actions on Page Header */}
             <div className="flex items-center gap-2.5 shrink-0">
+              {currentRole === 'CSM' && (
+                <NotificationBell
+                  onSelectTicket={(ticketId) => setSelectedTicketId(ticketId)}
+                  onNavigateContestados={() => {
+                    setCurrentPage('csm_contestados');
+                    setStatusFilter('ALL');
+                  }}
+                />
+              )}
+
               <button
                 onClick={handleExportCSV}
                 disabled={filteredTickets.length === 0}
@@ -483,6 +540,32 @@ const MainDashboard: React.FC = () => {
                   <span>Abrir Chamado</span>
                 </button>
               )}
+
+              <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block" />
+
+              <div className="hidden sm:flex items-center gap-2 pl-1">
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-300"
+                />
+                <div className="text-left leading-tight hidden md:block">
+                  <span className="text-xs font-bold text-slate-800 block">
+                    {currentUser.name}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block">
+                    {currentUser.role}
+                  </span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                  title="Sair / Trocar perfil"
+                  aria-label="Sair / Trocar perfil"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
 

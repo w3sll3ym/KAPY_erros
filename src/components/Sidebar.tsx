@@ -1,24 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
-  Layers,
   BookOpen,
-  Shield,
-  Headphones,
   CheckCircle2,
   AlertCircle,
   AlertTriangle,
-  LayoutDashboard,
   Clock,
   Archive,
-  ChevronDown,
-  UserCheck,
   X,
-  Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  LogOut,
 } from 'lucide-react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { UserRole, TicketStatus } from '../types/workflow';
 
 export type AppPage =
   | 'csm_reportados'
@@ -53,12 +46,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const {
     currentRole,
-    setCurrentRole,
+    currentUser,
+    logout,
     metrics,
     tickets,
   } = useWorkflow();
-
-  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
 
   // Navigation items strictly mapped per user role
   const navItems = useMemo(() => {
@@ -131,20 +123,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     // QUALIDADE
     return [
       {
-        id: 'qualidade_aprovados' as AppPage,
-        label: 'Erros Aprovados',
-        sublabel: 'Aguardando Análise da Qualidade',
-        icon: <CheckCircle2 className="w-4 h-4 text-white" />,
-        badgeCount: metrics.aprovadosAnalista,
-        badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
-      },
-      {
         id: 'qualidade_reprovados' as AppPage,
         label: 'Erros Reprovados',
-        sublabel: 'Para Parecer Final (Aprovar/Reprovar)',
+        sublabel: 'Para Parecer Final da Qualidade',
         icon: <AlertTriangle className="w-4 h-4 text-white" />,
         badgeCount: metrics.reprovadosAnalista,
         badgeColor: 'bg-orange-500/20 text-orange-300 border border-orange-500/30',
+      },
+      {
+        id: 'qualidade_aprovados' as AppPage,
+        label: 'Erros Aprovados',
+        sublabel: 'Aprovados pelo Analista (Direto)',
+        icon: <CheckCircle2 className="w-4 h-4 text-white" />,
+        badgeCount: metrics.aprovadosAnalista,
+        badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
       },
       {
         id: 'qualidade_finalizados' as AppPage,
@@ -152,56 +144,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         sublabel: 'Consolidado Concluídos',
         icon: <Archive className="w-4 h-4 text-white" />,
         badgeCount: metrics.finalizadosTotal,
-        badgeColor: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+        badgeColor: 'bg-slate-500/20 text-slate-300 border border-slate-500/30',
       },
     ];
   }, [currentRole, metrics, tickets]);
-
-  // RBAC Roles
-  const rolesList: {
-    role: UserRole;
-    label: string;
-    team: string;
-    icon: React.ReactNode;
-    pendingCount: number;
-    badgeColor: string;
-  }[] = [
-    {
-      role: 'CSM',
-      label: 'CSM (Relacionamento)',
-      team: 'Contas & Sucesso',
-      icon: <Headphones className="w-4 h-4 text-white" />,
-      pendingCount: metrics.informacoesFaltando,
-      badgeColor: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
-    },
-    {
-      role: 'ANALISTA',
-      label: 'Analista / Supervisor',
-      team: 'Triagem Técnica N2',
-      icon: <Layers className="w-4 h-4 text-white" />,
-      pendingCount: metrics.novoAguardandoTriagem,
-      badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
-    },
-    {
-      role: 'QUALIDADE',
-      label: 'Qualidade (QA)',
-      team: 'Auditoria & Arbitragem',
-      icon: <Shield className="w-4 h-4 text-white" />,
-      pendingCount: metrics.aprovadosAnalista + metrics.reprovadosAnalista,
-      badgeColor: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
-    },
-  ];
-
-  const handleSelectRole = (role: UserRole) => {
-    setCurrentRole(role);
-    if (role === 'CSM') {
-      onSelectPage('csm_reportados');
-    } else if (role === 'ANALISTA') {
-      onSelectPage('analista_reportados');
-    } else if (role === 'QUALIDADE') {
-      onSelectPage('qualidade_aprovados');
-    }
-  };
 
   const handlePageClick = (page: AppPage) => {
     onSelectPage(page);
@@ -367,79 +313,59 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </button>
           </div>
+        </div>
 
-          {/* RBAC Persona Selector Section */}
-          <div className="pt-2 border-t border-white/[0.08]">
-            {!isCollapsed && (
-              <div className="px-2.5 mb-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400/80">
-                  Simular Papel
-                </span>
-              </div>
-            )}
-
-            <div className="space-y-1">
-              {rolesList.map((r) => {
-                const isSelected = currentRole === r.role;
-
-                if (isCollapsed) {
-                  return (
-                    <button
-                      key={r.role}
-                      onClick={() => handleSelectRole(r.role)}
-                      title={`${r.label} (${r.team}) ${
-                        r.pendingCount > 0 ? `· ${r.pendingCount} pendente(s)` : ''
-                      }`}
-                      className={`w-full flex items-center justify-center p-2 rounded-lg text-xs transition-all cursor-pointer relative group ${
-                        isSelected
-                          ? 'bg-white/15 text-white font-semibold shadow-xs ring-1 ring-white/20'
-                          : 'text-white hover:bg-white/[0.08]'
-                      }`}
-                    >
-                      <span className="text-white scale-105 transition-transform shrink-0 flex items-center justify-center">
-                        {r.icon}
-                      </span>
-                      {r.pendingCount > 0 && (
-                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-400 ring-2 ring-[#0b132b]" />
-                      )}
-                    </button>
-                  );
-                }
-
-                return (
-                  <button
-                    key={r.role}
-                    onClick={() => handleSelectRole(r.role)}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer group ${
-                      isSelected
-                        ? 'bg-white/10 text-white font-semibold border border-white/15 shadow-xs'
-                        : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      <span className="text-white shrink-0 flex items-center justify-center">
-                        {r.icon}
-                      </span>
-                      <span className="truncate">{r.label}</span>
-                    </div>
-
-                    {r.pendingCount > 0 && (
-                      <span
-                        className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${
-                          isSelected
-                            ? 'bg-white/20 text-white'
-                            : r.badgeColor
-                        }`}
-                        title={`${r.pendingCount} chamado(s) aguardando`}
-                      >
-                        {r.pendingCount}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+        {/* User Profile & Logout Footer */}
+        <div className="p-3 border-t border-white/[0.08] bg-[#070d1e]">
+          {isCollapsed ? (
+            <div className="flex flex-col items-center gap-2">
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-white/20"
+                title={`${currentUser.name} (${currentUser.role})`}
+              />
+              <button
+                onClick={logout}
+                className="p-1.5 text-slate-400 hover:text-rose-300 hover:bg-white/[0.08] rounded-lg transition-colors cursor-pointer"
+                title="Sair / Trocar Usuário"
+                aria-label="Sair / Trocar Usuário"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-white/20 shrink-0"
+                />
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-white truncate block">
+                      {currentUser.name}
+                    </span>
+                    <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-white/10 text-slate-300 border border-white/10 shrink-0">
+                      {currentUser.role}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 truncate block">
+                    {currentUser.email}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="p-1.5 text-slate-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer shrink-0"
+                title="Sair da conta"
+                aria-label="Sair da conta"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </aside>
     </>
