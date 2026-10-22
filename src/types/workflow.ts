@@ -2,7 +2,7 @@
  * Definições de Tipos para o Sistema de Tratamento de Erros Reportados
  */
 
-export type UserRole = 'CSM' | 'ANALISTA' | 'QUALIDADE';
+export type UserRole = 'CSM' | 'ANALISTA' | 'QUALIDADE' | 'ADMIN' | 'GESTOR_ANALISTA';
 
 export interface UserProfile {
   role: UserRole;
@@ -11,6 +11,47 @@ export interface UserProfile {
   team: string;
   avatar: string;
   email: string;
+  supervisedAnalysts?: string[]; // Para GESTOR_ANALISTA: nomes dos analistas sob sua hierarquia
+  managerName?: string; // Para ANALISTA: nome do gestor responsável
+}
+
+export interface SystemUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  title: string;
+  team: string;
+  avatar: string;
+  status: 'ATIVO' | 'INATIVO';
+  supervisedAnalysts?: string[]; // Nomes ou IDs dos analistas sob a hierarquia do gestor
+  managerId?: string; // ID do Gestor de Analista
+  managerName?: string; // Nome do Gestor de Analista
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ClientRecord {
+  id: string;
+  name: string;
+  segment: string;
+  code?: string;
+  contactName?: string;
+  contactEmail?: string;
+  status: 'ATIVO' | 'INATIVO';
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CategoryRecord {
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  status: 'ATIVO' | 'INATIVO';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type TicketStatus =

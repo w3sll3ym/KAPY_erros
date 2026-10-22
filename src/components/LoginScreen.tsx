@@ -3,6 +3,8 @@ import {
   Layers,
   Headphones,
   Shield,
+  ShieldCheck,
+  Users,
   ArrowRight,
   Lock,
   Mail,
@@ -46,7 +48,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           const lower = emailOrRole.toLowerCase();
           let role: UserRole = 'ANALISTA';
           if (lower.includes('csm')) role = 'CSM';
+          if (lower.includes('gestor') || lower.includes('roberto')) role = 'GESTOR_ANALISTA';
           if (lower.includes('qualidade') || lower.includes('qa')) role = 'QUALIDADE';
+          if (lower.includes('admin') || lower.includes('henrique')) role = 'ADMIN';
           onLoginSuccess(role);
         }
       } else {
@@ -104,7 +108,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 flex flex-col justify-center">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-10 flex flex-col justify-center">
         {/* Title & Introduction */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
@@ -115,7 +119,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           </p>
         </div>
 
-        {/* 3 Simulated Profiles (Separated by Profile Type) */}
+        {/* 4 Simulated Profiles (Separated by Profile Type) */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3 px-1">
             <span className="text-xs font-semibold text-slate-700 tracking-wide uppercase">
@@ -126,7 +130,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
             {/* CSM Profile */}
             {(() => {
               const csm = SIMULATED_ACCOUNTS.CSM;
@@ -257,6 +261,71 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               );
             })()}
 
+            {/* GESTOR_ANALISTA Profile */}
+            {(() => {
+              const gestor = SIMULATED_ACCOUNTS.GESTOR_ANALISTA;
+              const isSelected = selectedRole === 'GESTOR_ANALISTA';
+              return (
+                <div
+                  key="gestor"
+                  onClick={() => handleSelectSimulatedRole('GESTOR_ANALISTA')}
+                  className={`border rounded-xl p-4 transition-all cursor-pointer bg-white flex flex-col justify-between hover:border-indigo-400 hover:shadow-xs group ${
+                    isSelected ? 'border-indigo-600 ring-1 ring-indigo-600/30' : 'border-slate-200'
+                  }`}
+                >
+                  <div>
+                    {/* Role Header */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>Gestor de Analista</span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        senha: 123
+                      </span>
+                    </div>
+
+                    {/* User Info */}
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <img
+                        src={gestor.avatar}
+                        alt={gestor.name}
+                        className="w-10 h-10 rounded-full object-cover ring-1 ring-slate-200"
+                      />
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-slate-900 block truncate">
+                          {gestor.name}
+                        </span>
+                        <span className="text-[11px] text-slate-500 block truncate">
+                          {gestor.title}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Context description */}
+                    <p className="text-[11px] text-slate-600 leading-relaxed mb-3">
+                      Supervisiona analistas e recebe notificações de todos sob sua hierarquia.
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 font-mono truncate max-w-[150px]">
+                      {gestor.email}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleFillOnly('GESTOR_ANALISTA', e)}
+                      className="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium cursor-pointer"
+                      title="Preencher no formulário"
+                    >
+                      Preencher
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* QUALIDADE Profile */}
             {(() => {
               const qa = SIMULATED_ACCOUNTS.QUALIDADE;
@@ -300,7 +369,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
                     {/* Context description */}
                     <p className="text-[11px] text-slate-600 leading-relaxed mb-3">
-                      Emite o veredito final exclusivo quando o Analista reprova um erro.
+                      Emite o veredito final conclusivo quando o Analista reprova um erro.
                     </p>
                   </div>
 
@@ -313,6 +382,71 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                       type="button"
                       onClick={(e) => handleFillOnly('QUALIDADE', e)}
                       className="text-[11px] text-orange-600 hover:text-orange-800 font-medium cursor-pointer"
+                      title="Preencher no formulário"
+                    >
+                      Preencher
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ADMINISTRADOR Profile */}
+            {(() => {
+              const adm = SIMULATED_ACCOUNTS.ADMIN;
+              const isSelected = selectedRole === 'ADMIN';
+              return (
+                <div
+                  key="admin"
+                  onClick={() => handleSelectSimulatedRole('ADMIN')}
+                  className={`border rounded-xl p-4 transition-all cursor-pointer bg-white flex flex-col justify-between hover:border-purple-400 hover:shadow-xs group ${
+                    isSelected ? 'border-purple-600 ring-1 ring-purple-600/30' : 'border-slate-200'
+                  }`}
+                >
+                  <div>
+                    {/* Role Header */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-700">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Administrador</span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        senha: 123
+                      </span>
+                    </div>
+
+                    {/* User Info */}
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <img
+                        src={adm.avatar}
+                        alt={adm.name}
+                        className="w-10 h-10 rounded-full object-cover ring-1 ring-slate-200"
+                      />
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-slate-900 block truncate">
+                          {adm.name}
+                        </span>
+                        <span className="text-[11px] text-slate-500 block truncate">
+                          {adm.title}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Context description */}
+                    <p className="text-[11px] text-slate-600 leading-relaxed mb-3">
+                      Atribui papéis dos usuários, cadastra clientes, categorias e audita o sistema.
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 font-mono truncate max-w-[150px]">
+                      {adm.email}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleFillOnly('ADMIN', e)}
+                      className="text-[11px] text-purple-600 hover:text-purple-800 font-medium cursor-pointer"
                       title="Preencher no formulário"
                     >
                       Preencher

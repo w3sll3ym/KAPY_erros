@@ -13,7 +13,6 @@ import { NotificationBell } from './components/NotificationBell';
 import { LoginScreen } from './components/LoginScreen';
 import { Ticket, TicketStatus, TicketSeverity, UserRole } from './types/workflow';
 import {
-  Download,
   Menu,
   Plus,
   Clock,
@@ -26,7 +25,19 @@ import {
   Filter,
   PanelLeftOpen,
   LogOut,
+  FileSpreadsheet,
+  Users,
+  Building2,
+  Tags,
+  ClipboardList,
+  SlidersHorizontal,
+  Settings,
 } from 'lucide-react';
+
+import { RoleHomeDashboard } from './components/dashboard/RoleHomeDashboard';
+import { ExportReportsPage } from './components/ExportReportsPage';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AdminManagementPage, ManagementTab } from './components/admin/AdminManagementPage';
 
 const PAGE_METADATA: Record<
   AppPage,
@@ -37,6 +48,51 @@ const PAGE_METADATA: Record<
     icon: React.ReactNode;
   }
 > = {
+  admin_inicio: {
+    title: 'Início · Visão Geral Administrador',
+    subtitle: 'Painel executivo de governança, configuração de papéis e indicadores operacionais.',
+    icon: <LayoutDashboard className="w-5 h-5 text-purple-600" />,
+  },
+  admin_configuracao: {
+    title: 'Configuração do Sistema',
+    subtitle: 'Configure os papéis dos usuários, cadastre clientes e parametrize categorias operacionais.',
+    icon: <Settings className="w-5 h-5 text-purple-600" />,
+  },
+  admin_gerenciamento: {
+    title: 'Configuração do Sistema',
+    subtitle: 'Configure os papéis dos usuários, cadastre clientes e parametrize categorias operacionais.',
+    icon: <Settings className="w-5 h-5 text-purple-600" />,
+  },
+  admin_usuarios: {
+    title: 'Gestão de Usuários & Atribuição de Papéis',
+    subtitle: 'Configure e defina quais papéis cada usuário irá desempenhar (CSM, Analista, Qualidade ou Administrador).',
+    icon: <Users className="w-5 h-5 text-purple-600" />,
+  },
+  admin_clientes: {
+    title: 'Cadastro e Gestão de Clientes',
+    subtitle: 'Cadastre e mantenha as empresas, clientes corporativos e seus respectivos segmentos.',
+    icon: <Building2 className="w-5 h-5 text-blue-600" />,
+  },
+  admin_categorias: {
+    title: 'Parametrização de Categorias',
+    subtitle: 'Parametrize e gerencie os módulos e categorias de erro para triagem e classificação.',
+    icon: <Tags className="w-5 h-5 text-indigo-600" />,
+  },
+  admin_chamados: {
+    title: 'Auditoria Geral de Erros',
+    subtitle: 'Visão global e irrestrita de todos os chamados reportados em todas as fases do workflow.',
+    icon: <ClipboardList className="w-5 h-5 text-emerald-600" />,
+  },
+  csm_inicio: {
+    title: 'Início · Visão Geral CSM',
+    subtitle: 'Painel executivo com métricas, gráficos e indicadores de erros reportados para Customer Success.',
+    icon: <LayoutDashboard className="w-5 h-5 text-blue-600" />,
+  },
+  exportar_relatorios: {
+    title: 'Exportação de Relatórios',
+    subtitle: 'Exporte relatórios personalizados em CSV (Excel) ou JSON com filtros granulares e seleção de colunas.',
+    icon: <FileSpreadsheet className="w-5 h-5 text-indigo-600" />,
+  },
   csm_reportados: {
     title: 'Erros Reportados',
     subtitle: 'Visão completa de todos os chamados reportados pelo perfil CSM (em andamento e finalizados).',
@@ -60,6 +116,11 @@ const PAGE_METADATA: Record<
     ],
     icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />,
   },
+  analista_inicio: {
+    title: 'Início · Visão Geral Analista',
+    subtitle: 'Painel operacional de triagem técnica, volume por células e diagnóstico de causas de erro.',
+    icon: <LayoutDashboard className="w-5 h-5 text-indigo-600" />,
+  },
   analista_reportados: {
     title: 'Erros Abertos',
     subtitle: 'Chamados abertos sob gestão do Analista: novos aguardando triagem e contestados aguardando correção do CSM.',
@@ -77,6 +138,11 @@ const PAGE_METADATA: Record<
       'REPROVADO_QUALIDADE',
     ],
     icon: <Archive className="w-5 h-5 text-emerald-600" />,
+  },
+  qualidade_inicio: {
+    title: 'Início · Visão Geral Qualidade',
+    subtitle: 'Painel gerencial de auditoria, taxa de procedência de erros e controle de homologações.',
+    icon: <LayoutDashboard className="w-5 h-5 text-teal-600" />,
   },
   qualidade_reprovados: {
     title: 'Erros Reprovados (Para Veredito)',
@@ -96,6 +162,23 @@ const PAGE_METADATA: Record<
     targetStatus: ['APROVADO_ANALISTA', 'APROVADO_QUALIDADE', 'REPROVADO_QUALIDADE'],
     icon: <Archive className="w-5 h-5 text-emerald-600" />,
   },
+  gestor_inicio: {
+    title: 'Início · Visão Geral Gestor de Analista',
+    subtitle: 'Painel operacional e gerencial de supervisão da equipe de analistas sob sua hierarquia.',
+    icon: <LayoutDashboard className="w-5 h-5 text-indigo-600" />,
+  },
+  gestor_equipe: {
+    title: 'Erros da Equipe de Analistas',
+    subtitle: 'Chamados novos e contestados sob a responsabilidade dos analistas atrelados à sua hierarquia.',
+    targetStatus: ['NOVO_AGUARDANDO_TRIAGEM', 'INFORMACOES_FALTANDO'],
+    icon: <Clock className="w-5 h-5 text-indigo-600" />,
+  },
+  gestor_finalizados: {
+    title: 'Erros Finalizados da Equipe',
+    subtitle: 'Chamados triados e concluídos pelos analistas sob sua supervisão (aprovados ou com parecer da qualidade).',
+    targetStatus: ['APROVADO_ANALISTA', 'APROVADO_QUALIDADE', 'REPROVADO_QUALIDADE'],
+    icon: <Archive className="w-5 h-5 text-emerald-600" />,
+  },
 };
 
 const MainDashboard: React.FC = () => {
@@ -108,12 +191,16 @@ const MainDashboard: React.FC = () => {
     logout,
     loading,
     error,
+    clientsList,
+    getSupervisedAnalysts,
   } = useWorkflow();
 
   const getDefaultPage = (role: UserRole): AppPage => {
-    if (role === 'CSM') return 'csm_reportados';
-    if (role === 'ANALISTA') return 'analista_reportados';
-    return 'qualidade_reprovados';
+    if (role === 'CSM') return 'csm_inicio';
+    if (role === 'ANALISTA') return 'analista_inicio';
+    if (role === 'GESTOR_ANALISTA') return 'gestor_inicio';
+    if (role === 'QUALIDADE') return 'qualidade_inicio';
+    return 'admin_inicio';
   };
 
   // Active page state in Sidebar
@@ -123,29 +210,66 @@ const MainDashboard: React.FC = () => {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
+  const [adminManagementTab, setAdminManagementTab] = useState<ManagementTab>('usuarios');
 
   // Sincroniza a página com o papel ativo (garantindo que cada perfil visualize apenas suas telas)
-  // e fecha o modal de novo reporte se mudar para perfis sem permissão (ANALISTA ou QUALIDADE)
+  // e fecha o modal de novo reporte se mudar para perfis sem permissão (ANALISTA, GESTOR_ANALISTA ou QUALIDADE)
   React.useEffect(() => {
+    // Páginas compartilhadas e acessíveis a nível de configuração/relatórios
+    if (
+      currentPage === 'admin_configuracao' ||
+      currentPage === 'admin_gerenciamento' ||
+      currentPage === 'admin_usuarios' ||
+      currentPage === 'admin_clientes' ||
+      currentPage === 'admin_categorias' ||
+      currentPage === 'exportar_relatorios'
+    ) {
+      if (currentRole !== 'CSM' && isNewTicketOpen) {
+        setIsNewTicketOpen(false);
+      }
+      return;
+    }
+
     if (currentRole === 'CSM') {
       if (
+        currentPage !== 'csm_inicio' &&
         currentPage !== 'csm_reportados' &&
         currentPage !== 'csm_contestados' &&
         currentPage !== 'csm_avaliados'
       ) {
-        setCurrentPage('csm_reportados');
+        setCurrentPage('csm_inicio');
       }
     } else if (currentRole === 'ANALISTA') {
-      if (currentPage !== 'analista_reportados' && currentPage !== 'analista_finalizados') {
-        setCurrentPage('analista_reportados');
+      if (
+        currentPage !== 'analista_inicio' &&
+        currentPage !== 'analista_reportados' &&
+        currentPage !== 'analista_finalizados'
+      ) {
+        setCurrentPage('analista_inicio');
+      }
+    } else if (currentRole === 'GESTOR_ANALISTA') {
+      if (
+        currentPage !== 'gestor_inicio' &&
+        currentPage !== 'gestor_equipe' &&
+        currentPage !== 'gestor_finalizados'
+      ) {
+        setCurrentPage('gestor_inicio');
       }
     } else if (currentRole === 'QUALIDADE') {
       if (
+        currentPage !== 'qualidade_inicio' &&
         currentPage !== 'qualidade_aprovados' &&
         currentPage !== 'qualidade_reprovados' &&
         currentPage !== 'qualidade_finalizados'
       ) {
-        setCurrentPage('qualidade_reprovados');
+        setCurrentPage('qualidade_inicio');
+      }
+    } else if (currentRole === 'ADMIN') {
+      if (
+        currentPage !== 'admin_inicio' &&
+        currentPage !== 'admin_chamados'
+      ) {
+        setCurrentPage('admin_inicio');
       }
     }
 
@@ -184,15 +308,6 @@ const MainDashboard: React.FC = () => {
     return tickets.find((t) => t.id === selectedTicketId) || null;
   }, [tickets, selectedTicketId]);
 
-  // Unique clients list
-  const clientsList = useMemo(() => {
-    const set = new Set<string>();
-    tickets.forEach((t) => {
-      if (t.clientName) set.add(t.clientName);
-    });
-    return Array.from(set).sort();
-  }, [tickets]);
-
   // Page filter integration: if on a dedicated page, restrict to its target status
   const pageTargetStatus = PAGE_METADATA[currentPage].targetStatus;
 
@@ -208,6 +323,21 @@ const MainDashboard: React.FC = () => {
           }
         } else if (currentPage === 'analista_finalizados') {
           // Página "Erros Finalizados": NUNCA exibe chamados novos nem contestados (INFORMACOES_FALTANDO)
+          if (t.status === 'NOVO_AGUARDANDO_TRIAGEM' || t.status === 'INFORMACOES_FALTANDO') {
+            return false;
+          }
+        }
+      } else if (currentRole === 'GESTOR_ANALISTA') {
+        const myAnalysts = getSupervisedAnalysts(currentUser.name);
+        const isTeamTicket =
+          !t.analystName || myAnalysts.length === 0 || myAnalysts.includes(t.analystName);
+        if (!isTeamTicket) return false;
+
+        if (currentPage === 'gestor_equipe') {
+          if (t.status !== 'NOVO_AGUARDANDO_TRIAGEM' && t.status !== 'INFORMACOES_FALTANDO') {
+            return false;
+          }
+        } else if (currentPage === 'gestor_finalizados') {
           if (t.status === 'NOVO_AGUARDANDO_TRIAGEM' || t.status === 'INFORMACOES_FALTANDO') {
             return false;
           }
@@ -296,6 +426,9 @@ const MainDashboard: React.FC = () => {
         if (currentRole === 'ANALISTA' && t.status !== 'NOVO_AGUARDANDO_TRIAGEM') {
           return false;
         }
+        if (currentRole === 'GESTOR_ANALISTA' && t.status !== 'NOVO_AGUARDANDO_TRIAGEM') {
+          return false;
+        }
         if (
           currentRole === 'QUALIDADE' &&
           t.status !== 'REPROVADO_ANALISTA' &&
@@ -316,6 +449,8 @@ const MainDashboard: React.FC = () => {
     clientFilter,
     isOnlyMyActionsActive,
     currentRole,
+    currentUser,
+    getSupervisedAnalysts,
   ]);
 
   const hasActiveFilters =
@@ -342,6 +477,12 @@ const MainDashboard: React.FC = () => {
       ) {
         setCurrentPage('analista_finalizados');
       }
+    } else if (currentRole === 'GESTOR_ANALISTA') {
+      if (status === 'INFORMACOES_FALTANDO' || status === 'NOVO_AGUARDANDO_TRIAGEM') {
+        setCurrentPage('gestor_equipe');
+      } else if (status !== 'ALL') {
+        setCurrentPage('gestor_finalizados');
+      }
     } else if (currentRole === 'CSM') {
       if (status === 'NOVO_AGUARDANDO_TRIAGEM') {
         setCurrentPage('csm_reportados');
@@ -362,43 +503,7 @@ const MainDashboard: React.FC = () => {
     setIsOnlyMyActionsActive((prev) => !prev);
   };
 
-  // Export report as CSV
-  const handleExportCSV = () => {
-    if (filteredTickets.length === 0) return;
-    const headers = [
-      'Código',
-      'Título',
-      'Cliente',
-      'Segmento',
-      'Categoria',
-      'Severidade',
-      'Status',
-      'Aberto Em',
-      'Atualizado Em',
-    ];
-    const rows = filteredTickets.map((t) => [
-      `"${t.code || ''}"`,
-      `"${(t.title || '').replace(/"/g, '""')}"`,
-      `"${(t.clientName || '').replace(/"/g, '""')}"`,
-      `"${t.clientSegment || ''}"`,
-      `"${t.category || ''}"`,
-      `"${t.severity || ''}"`,
-      `"${t.status || ''}"`,
-      `"${t.createdAt || ''}"`,
-      `"${t.updatedAt || ''}"`,
-    ]);
 
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [headers.join(';'), ...rows.map((r) => r.join(';'))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `relatorio_${currentPage}_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const activeMeta = PAGE_METADATA[currentPage];
 
@@ -449,11 +554,27 @@ const MainDashboard: React.FC = () => {
             <span>{activeMeta.title}</span>
           </div>
           <div className="flex items-center gap-2">
-            {currentRole === 'CSM' && (
+            {(currentRole === 'CSM' ||
+              currentRole === 'ANALISTA' ||
+              currentRole === 'GESTOR_ANALISTA') && (
               <NotificationBell
                 onSelectTicket={(ticketId) => setSelectedTicketId(ticketId)}
                 onNavigateContestados={() => {
-                  setCurrentPage('csm_contestados');
+                  if (currentRole === 'CSM') {
+                    setCurrentPage('csm_contestados');
+                  } else if (currentRole === 'GESTOR_ANALISTA') {
+                    setCurrentPage('gestor_equipe');
+                  } else {
+                    setCurrentPage('analista_reportados');
+                  }
+                  setStatusFilter('ALL');
+                }}
+                onNavigateQueue={() => {
+                  if (currentRole === 'GESTOR_ANALISTA') {
+                    setCurrentPage('gestor_equipe');
+                  } else {
+                    setCurrentPage('analista_reportados');
+                  }
                   setStatusFilter('ALL');
                 }}
               />
@@ -504,7 +625,14 @@ const MainDashboard: React.FC = () => {
                 </button>
               )}
               <div>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                <h1
+                  className="text-slate-900 tracking-tight"
+                  style={{
+                    fontWeight: 'bold',
+                    fontSize: '21px',
+                    fontFamily: 'system-ui',
+                  }}
+                >
                   {activeMeta.title}
                 </h1>
               </div>
@@ -512,33 +640,30 @@ const MainDashboard: React.FC = () => {
 
             {/* Quick Actions on Page Header */}
             <div className="flex items-center gap-2.5 shrink-0">
-              {currentRole === 'CSM' && (
+              {(currentRole === 'CSM' ||
+                currentRole === 'ANALISTA' ||
+                currentRole === 'GESTOR_ANALISTA') && (
                 <NotificationBell
                   onSelectTicket={(ticketId) => setSelectedTicketId(ticketId)}
                   onNavigateContestados={() => {
-                    setCurrentPage('csm_contestados');
+                    if (currentRole === 'CSM') {
+                      setCurrentPage('csm_contestados');
+                    } else if (currentRole === 'GESTOR_ANALISTA') {
+                      setCurrentPage('gestor_equipe');
+                    } else {
+                      setCurrentPage('analista_reportados');
+                    }
+                    setStatusFilter('ALL');
+                  }}
+                  onNavigateQueue={() => {
+                    if (currentRole === 'GESTOR_ANALISTA') {
+                      setCurrentPage('gestor_equipe');
+                    } else {
+                      setCurrentPage('analista_reportados');
+                    }
                     setStatusFilter('ALL');
                   }}
                 />
-              )}
-
-              <button
-                onClick={handleExportCSV}
-                disabled={filteredTickets.length === 0}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-2xs transition-colors cursor-pointer disabled:opacity-40"
-              >
-                <Download className="w-3.5 h-3.5 text-slate-500" />
-                <span>Exportar CSV</span>
-              </button>
-
-              {currentRole === 'CSM' && (
-                <button
-                  onClick={() => setIsNewTicketOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs transition-all active:scale-[0.98] cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Abrir Chamado</span>
-                </button>
               )}
 
               <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block" />
@@ -569,59 +694,117 @@ const MainDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* KPI Metrics Cards (Visible across pages to give instant context) */}
-          <MetricsCards
-            selectedStatusFilter={statusFilter}
-            onSelectStatusFilter={handleSelectStatusFromMetric}
-          />
+          {/* Check if current page is Reports, Admin, Home/Dashboard, or Queue */}
+          {(() => {
+            if (currentPage === 'exportar_relatorios') {
+              return <ExportReportsPage />;
+            }
 
-          {/* Filters & Search Bar */}
-          <TicketFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            clientFilter={clientFilter}
-            onClientFilterChange={setClientFilter}
-            clientsList={clientsList}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            isOnlyMyActionsActive={isOnlyMyActionsActive}
-            onToggleOnlyMyActions={handleToggleMyActions}
-            onResetFilters={handleResetFilters}
-            hasActiveFilters={hasActiveFilters}
-          />
+            if (currentPage === 'admin_inicio') {
+              return (
+                <AdminDashboard
+                  onNavigate={(page, tab) => {
+                    if (tab) setAdminManagementTab(tab);
+                    setCurrentPage(page);
+                  }}
+                />
+              );
+            }
 
-          {/* Results Summary Subheader */}
-          <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-            <div className="flex items-center gap-2">
-              <span>
-                Exibindo <strong>{filteredTickets.length}</strong> de{' '}
-                <strong>{tickets.length}</strong> chamados
-              </span>
-              {hasActiveFilters && (
-                <span className="text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                  Filtros ativos
-                </span>
-              )}
-            </div>
-          </div>
+            if (currentPage === 'admin_configuracao' || currentPage === 'admin_gerenciamento') {
+              return <AdminManagementPage initialTab={adminManagementTab} />;
+            }
 
-          {/* View: Table or Kanban */}
-          {viewMode === 'table' ? (
-            <TicketTable
-              tickets={filteredTickets}
-              onSelectTicket={(t) => setSelectedTicketId(t.id)}
-              onOpenNewTicket={currentRole === 'CSM' ? () => setIsNewTicketOpen(true) : undefined}
-              onEditTicket={(t) => setEditingTicket(t)}
-            />
-          ) : (
-            <TicketKanban
-              tickets={filteredTickets}
-              onSelectTicket={(t) => setSelectedTicketId(t.id)}
-              onEditTicket={(t) => setEditingTicket(t)}
-            />
-          )}
+            if (currentPage === 'admin_usuarios') {
+              return <AdminManagementPage initialTab="usuarios" />;
+            }
+
+            if (currentPage === 'admin_clientes') {
+              return <AdminManagementPage initialTab="clientes" />;
+            }
+
+            if (currentPage === 'admin_categorias') {
+              return <AdminManagementPage initialTab="categorias" />;
+            }
+
+            const isHomePage =
+              currentPage === 'csm_inicio' ||
+              currentPage === 'analista_inicio' ||
+              currentPage === 'gestor_inicio' ||
+              currentPage === 'qualidade_inicio';
+
+            if (isHomePage) {
+              return (
+                <RoleHomeDashboard
+                  onSelectTicket={(ticketId) => setSelectedTicketId(ticketId)}
+                  onNavigateToPage={(page) => {
+                    setCurrentPage(page);
+                    setStatusFilter('ALL');
+                  }}
+                  onOpenNewTicket={() => setIsNewTicketOpen(true)}
+                  onEditTicket={(ticket) => setEditingTicket(ticket)}
+                />
+              );
+            }
+
+            return (
+              <>
+                {/* KPI Metrics Cards (Visible across list pages to give instant context) */}
+                <MetricsCards
+                  selectedStatusFilter={statusFilter}
+                  onSelectStatusFilter={handleSelectStatusFromMetric}
+                />
+
+                {/* Filters & Search Bar */}
+                <TicketFilters
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  statusFilter={statusFilter}
+                  onStatusFilterChange={setStatusFilter}
+                  clientFilter={clientFilter}
+                  onClientFilterChange={setClientFilter}
+                  clientsList={clientsList}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  isOnlyMyActionsActive={isOnlyMyActionsActive}
+                  onToggleOnlyMyActions={handleToggleMyActions}
+                  onResetFilters={handleResetFilters}
+                  hasActiveFilters={hasActiveFilters}
+                />
+
+                {/* Results Summary Subheader */}
+                <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                  <div className="flex items-center gap-2">
+                    <span>
+                      Exibindo <strong>{filteredTickets.length}</strong> de{' '}
+                      <strong>{tickets.length}</strong> chamados
+                    </span>
+                    {hasActiveFilters && (
+                      <span className="text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                        Filtros ativos
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* View: Table or Kanban */}
+                {viewMode === 'table' ? (
+                  <TicketTable
+                    tickets={filteredTickets}
+                    onSelectTicket={(t) => setSelectedTicketId(t.id)}
+                    onOpenNewTicket={currentRole === 'CSM' ? () => setIsNewTicketOpen(true) : undefined}
+                    onEditTicket={(t) => setEditingTicket(t)}
+                  />
+                ) : (
+                  <TicketKanban
+                    tickets={filteredTickets}
+                    onSelectTicket={(t) => setSelectedTicketId(t.id)}
+                    onEditTicket={(t) => setEditingTicket(t)}
+                  />
+                )}
+              </>
+            );
+          })()}
         </main>
       </div>
 

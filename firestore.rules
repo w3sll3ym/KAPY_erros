@@ -5,5 +5,17 @@ service cloud.firestore {
     match /tickets/{ticketId} {
       allow read, write: if true;
     }
+    // Gestão de usuários e papéis do sistema
+    match /system_users/{userId} {
+      allow read, write: if true;
+    }
+    // Gestão e cadastro de clientes
+    match /clients/{clientId} {
+      allow read, write: if true;
+    }
+    // Gestão e cadastro de categorias de chamados
+    match /categories/{categoryId} {
+      allow read, write: if true;
+    }
   }
 }

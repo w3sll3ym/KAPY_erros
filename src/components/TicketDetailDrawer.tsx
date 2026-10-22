@@ -130,7 +130,6 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
     }
   };
 
-  // Determine who has the action turn
   let responsibleRole: UserRole | 'CONCLUIDO' = 'CONCLUIDO';
   if (currentTicket.status === 'NOVO_AGUARDANDO_TRIAGEM') responsibleRole = 'ANALISTA';
   if (currentTicket.status === 'INFORMACOES_FALTANDO') responsibleRole = 'CSM';
@@ -141,7 +140,9 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
     responsibleRole = 'QUALIDADE';
   }
 
-  const isMyTurn = responsibleRole === currentRole;
+  const isMyTurn =
+    responsibleRole === currentRole ||
+    (currentRole === 'GESTOR_ANALISTA' && responsibleRole === 'ANALISTA');
 
   return (
     <>
@@ -321,8 +322,9 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
         {/* CONTEXTUAL ACTION BAR (Only shown when it's the active role's turn to take action) */}
         {isMyTurn && responsibleRole !== 'CONCLUIDO' && (
           <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/90">
-            {/* Action Set 1: ANALISTA on NOVO_AGUARDANDO_TRIAGEM */}
-            {currentRole === 'ANALISTA' && currentTicket.status === 'NOVO_AGUARDANDO_TRIAGEM' && (
+            {/* Action Set 1: ANALISTA or GESTOR_ANALISTA on NOVO_AGUARDANDO_TRIAGEM */}
+            {(currentRole === 'ANALISTA' || currentRole === 'GESTOR_ANALISTA') &&
+              currentTicket.status === 'NOVO_AGUARDANDO_TRIAGEM' && (
               <div className="space-y-3">
                 {!showDirectApprovePrompt ? (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">

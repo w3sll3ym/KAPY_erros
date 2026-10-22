@@ -27,6 +27,43 @@
         "createdByRole": { "type": "string", "description": "Papel do criador (CSM)" },
         "timeline": { "type": "array", "description": "Trilha cronológica de auditoria e decisões" }
       }
+    },
+    "system_users": {
+      "description": "Usuários do sistema e seus respectivos papéis configurados pelo administrador",
+      "fields": {
+        "name": { "type": "string", "description": "Nome completo do usuário" },
+        "email": { "type": "string", "description": "Email corporativo do usuário" },
+        "role": { "type": "string", "description": "Papel do usuário: CSM, ANALISTA, QUALIDADE, ADMIN" },
+        "title": { "type": "string", "description": "Cargo ou função" },
+        "team": { "type": "string", "description": "Equipe ou departamento" },
+        "avatar": { "type": "string", "description": "URL da foto de avatar" },
+        "status": { "type": "string", "description": "Status da conta: ATIVO ou INATIVO" },
+        "createdAt": { "type": "string", "description": "Data de criação em ISO" },
+        "updatedAt": { "type": "string", "description": "Data de atualização em ISO" }
+      }
+    },
+    "clients": {
+      "description": "Clientes e empresas cadastradas no sistema",
+      "fields": {
+        "name": { "type": "string", "description": "Nome da empresa/cliente" },
+        "segment": { "type": "string", "description": "Segmento de mercado (ex: Enterprise, Corporativo, PME)" },
+        "code": { "type": "string", "description": "Código interno do cliente" },
+        "contactName": { "type": "string", "description": "Nome do contato principal" },
+        "contactEmail": { "type": "string", "description": "Email do contato" },
+        "status": { "type": "string", "description": "Status do cliente: ATIVO ou INATIVO" },
+        "notes": { "type": "string", "description": "Observações do cliente" },
+        "createdAt": { "type": "string", "description": "Data de cadastro em ISO" }
+      }
+    },
+    "categories": {
+      "description": "Categorias de erros e módulos do sistema gerenciadas pelo administrador",
+      "fields": {
+        "name": { "type": "string", "description": "Nome da categoria" },
+        "description": { "type": "string", "description": "Descrição detalhada do módulo/categoria" },
+        "color": { "type": "string", "description": "Cor ou tag visual" },
+        "status": { "type": "string", "description": "Status: ATIVO ou INATIVO" },
+        "createdAt": { "type": "string", "description": "Data de cadastro em ISO" }
+      }
     }
   }
 }

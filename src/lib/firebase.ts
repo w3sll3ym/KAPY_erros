@@ -1,17 +1,29 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeFirestore, getFirestore } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+import {
+  initializeFirestore,
+  getFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  memoryLocalCache,
+} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import firebaseConfig from '@/firebase-applet-config.json';
 
 // Inicialização da instância do Firebase
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Inicializa Firestore com suporte a HTTP Long Polling
-// Evita falhas de conexão de WebSockets comuns em iframes e ambientes de proxy
+// Inicializa Firestore com detecção automática de transporte e cache adequado para o ambiente
 let dbInstance;
 try {
+  const isBrowser = typeof window !== 'undefined';
   dbInstance = initializeFirestore(
     app,
     {
+      localCache: isBrowser
+        ? persistentLocalCache({
+            tabManager: persistentMultipleTabManager(),
+          })
+        : memoryLocalCache(),
       experimentalForceLongPolling: true,
     },
     firebaseConfig.firestoreDatabaseId || undefined
@@ -23,5 +35,5 @@ try {
 }
 
 export const db = dbInstance;
+export const auth = getAuth(app);
 export default app;
-

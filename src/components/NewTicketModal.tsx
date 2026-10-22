@@ -27,7 +27,7 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
   onClose,
   onTicketCreated,
 }) => {
-  const { createTicket, currentRole, setCurrentRole, currentUser } = useWorkflow();
+  const { createTicket, currentRole, setCurrentRole, currentUser, clientsList } = useWorkflow();
 
   // Os 8 campos obrigatórios solicitados:
   // 1. Célula do Analista
@@ -242,7 +242,8 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
               </label>
               <input
                 type="text"
-                placeholder="Ex: Grupo Carrefour Brasil"
+                list="clients-datalist"
+                placeholder="Ex: Banco Safira S.A."
                 value={clientName}
                 onChange={(e) => {
                   setClientName(e.target.value);
@@ -250,6 +251,11 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
                 }}
                 className="w-full text-xs sm:text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white"
               />
+              <datalist id="clients-datalist">
+                {clientsList.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
               {errors.clientName && (
                 <p className="text-[11px] text-rose-600 mt-1">{errors.clientName}</p>
               )}

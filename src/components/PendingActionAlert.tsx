@@ -92,9 +92,6 @@ export const PendingActionAlert: React.FC<PendingActionAlertProps> = ({
             <h3 className={`text-xs sm:text-sm font-bold ${textColor}`}>
               {message}
             </h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-white/80 rounded border border-slate-200/60">
-              Ação Requerida
-            </span>
           </div>
           <p className="text-xs text-slate-600 mt-0.5 leading-relaxed max-w-2xl">
             {submessage}

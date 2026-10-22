@@ -180,11 +180,71 @@ export const WorkflowGuideModal: React.FC<WorkflowGuideModalProps> = ({
                   onSwitchRole('QUALIDADE');
                   onClose();
                 }}
-                className="mt-4 text-xs font-medium text-purple-700 hover:text-purple-900 flex items-center gap-1"
+                className="mt-4 text-xs font-medium text-purple-700 hover:text-purple-900 flex items-center gap-1 cursor-pointer"
               >
                 Alternar para Qualidade <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
+          </div>
+
+          {/* Gestor de Analista Section */}
+          <div className="border border-indigo-200 bg-indigo-50/40 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-bold text-indigo-800 uppercase tracking-wide">
+                  Perfil de Supervisão & Notificações
+                </span>
+                <span className="text-[11px] font-semibold bg-indigo-100 text-indigo-900 px-2 py-0.5 rounded">
+                  Gestor de Analista
+                </span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-sm">
+                Supervisão de Hierarquia e Notificações Centralizadas
+              </h3>
+              <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                Enquanto o perfil de analista recebe notificações atreladas exclusivamente ao seu nome, o Gestor de Analista recebe centralizadamente todas as notificações dos analistas sob sua hierarquia (novos chamados, retornos de contestação e pareceres).
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                onSwitchRole('GESTOR_ANALISTA');
+                onClose();
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors cursor-pointer shrink-0"
+            >
+              <span>Alternar para Gestor</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Admin Role Section */}
+          <div className="border border-purple-200 bg-purple-50/30 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-bold text-purple-800 uppercase tracking-wide">
+                  Perfil de Gestão
+                </span>
+                <span className="text-[11px] font-semibold bg-purple-100 text-purple-800 px-2 py-0.5 rounded">
+                  Administrador
+                </span>
+              </div>
+              <h3 className="font-semibold text-slate-900 text-sm">
+                Configuração de Papéis, Clientes e Categorias
+              </h3>
+              <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                O Administrador gerencia quais papéis cada usuário irá desempenhar no sistema (CSM, Analista, Qualidade, Admin), cadastra novos clientes parceiros, parametriza categorias de erros e monitora a auditoria completa de chamados.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                onSwitchRole('ADMIN');
+                onClose();
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors cursor-pointer shrink-0"
+            >
+              <span>Alternar para Administrador</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           {/* Table of Statuses */}
