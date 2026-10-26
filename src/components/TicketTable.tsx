@@ -137,6 +137,11 @@ export const TicketTable: React.FC<TicketTableProps> = ({
                   <td className="py-3.5 px-4">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                        {ticket.service && (
+                          <span className="text-[10px] font-semibold bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200" title="Serviço / Fila de Atendimento">
+                            Serviço: {ticket.service}
+                          </span>
+                        )}
                         {ticket.analystCell && (
                           <span className="text-[10px] font-semibold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200">
                             Célula: {ticket.analystCell}

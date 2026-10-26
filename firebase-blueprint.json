@@ -64,6 +64,18 @@
         "status": { "type": "string", "description": "Status: ATIVO ou INATIVO" },
         "createdAt": { "type": "string", "description": "Data de cadastro em ISO" }
       }
+    },
+    "services": {
+      "description": "Tipos de serviços e filas de atendimento cujo sufixo/sigla inicia o código dos chamados",
+      "fields": {
+        "name": { "type": "string", "description": "Nome do serviço/fila" },
+        "codePrefix": { "type": "string", "description": "Sufixo ou sigla que inicia o código do chamado (ex: N2, SUP, API)" },
+        "description": { "type": "string", "description": "Descrição da fila de atendimento" },
+        "color": { "type": "string", "description": "Cor de destaque do serviço" },
+        "status": { "type": "string", "description": "Status: ATIVO ou INATIVO" },
+        "createdAt": { "type": "string", "description": "Data de cadastro em ISO" },
+        "updatedAt": { "type": "string", "description": "Data de atualização em ISO" }
+      }
     }
   }
 }

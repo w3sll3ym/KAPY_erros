@@ -251,6 +251,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: <LayoutDashboard className="w-4 h-4 text-white" />,
         },
         {
+          id: 'admin_usuarios' as AppPage,
+          label: 'Usuários Cadastrados',
+          sublabel: 'Gestão de Papéis & Acessos',
+          icon: <Users className="w-4 h-4 text-white" />,
+          badgeCount: systemUsers.length,
+          badgeColor: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
+        },
+        {
+          id: 'admin_clientes' as AppPage,
+          label: 'Clientes & Empresas',
+          sublabel: 'Empresas e Segmentos',
+          icon: <Building2 className="w-4 h-4 text-white" />,
+          badgeCount: clients.length,
+          badgeColor: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+        },
+        {
+          id: 'admin_categorias' as AppPage,
+          label: 'Categorias Parametrizadas',
+          sublabel: 'Classificação de Erros',
+          icon: <Tags className="w-4 h-4 text-white" />,
+          badgeCount: categories.length,
+          badgeColor: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30',
+        },
+        {
           id: 'admin_chamados' as AppPage,
           label: 'Auditoria de Erros',
           sublabel: 'Todos os Chamados',
@@ -339,7 +363,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             {!isCollapsed && (
               <span className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400/80 block mb-1.5">
-                {currentRole === 'ADMIN' ? 'Painel & Auditoria' : 'Filas de Trabalho'}
+                {currentRole === 'ADMIN' ? 'Módulos de Gestão & Auditoria' : 'Filas de Trabalho'}
               </span>
             )}
             <nav className="space-y-1">
@@ -405,44 +429,44 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </nav>
           </div>
 
-          {/* Configuração do Sistema */}
-          <div>
-            {!isCollapsed && (
-              <span className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400/80 block mb-1.5">
-                Configuração
-              </span>
-            )}
-            <button
-              onClick={() => {
-                if (currentRole !== 'ADMIN') {
-                  setCurrentRole('ADMIN');
-                }
-                handlePageClick('admin_configuracao');
-              }}
-              title={`Configuração do Sistema (${systemUsers.length} usuários cadastrados)`}
-              className={`w-full flex items-center rounded-lg text-xs font-medium transition-colors cursor-pointer group ${
-                currentPage === 'admin_configuracao' ||
-                currentPage === 'admin_gerenciamento' ||
-                currentPage === 'admin_usuarios' ||
-                currentPage === 'admin_clientes' ||
-                currentPage === 'admin_categorias'
-                  ? 'bg-purple-600/25 text-white font-semibold border border-purple-500/40 shadow-xs'
-                  : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
-              } ${isCollapsed ? 'justify-center p-2' : 'px-2.5 py-2 justify-between'}`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Settings className="w-4 h-4 text-purple-400 shrink-0 group-hover:rotate-45 transition-transform" />
-                {!isCollapsed && (
-                  <span className="truncate">Configuração</span>
-                )}
-              </div>
+          {/* Configuração do Sistema (acesso rápido para perfis operacionais) */}
+          {currentRole !== 'ADMIN' && (
+            <div>
               {!isCollapsed && (
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0 ml-1.5">
-                  {systemUsers.length}
+                <span className="px-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400/80 block mb-1.5">
+                  Configuração
                 </span>
               )}
-            </button>
-          </div>
+              <button
+                onClick={() => {
+                  setCurrentRole('ADMIN');
+                  handlePageClick('admin_configuracao');
+                }}
+                title={`Configuração do Sistema (${systemUsers.length} usuários cadastrados)`}
+                className={`w-full flex items-center rounded-lg text-xs font-medium transition-colors cursor-pointer group ${
+                  currentPage === 'admin_configuracao' ||
+                  currentPage === 'admin_gerenciamento' ||
+                  currentPage === 'admin_usuarios' ||
+                  currentPage === 'admin_clientes' ||
+                  currentPage === 'admin_categorias'
+                    ? 'bg-purple-600/25 text-white font-semibold border border-purple-500/40 shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
+                } ${isCollapsed ? 'justify-center p-2' : 'px-2.5 py-2 justify-between'}`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Settings className="w-4 h-4 text-purple-400 shrink-0 group-hover:rotate-45 transition-transform" />
+                  {!isCollapsed && (
+                    <span className="truncate">Configuração</span>
+                  )}
+                </div>
+                {!isCollapsed && (
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0 ml-1.5">
+                    {systemUsers.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Relatórios & Exportação */}
           <div>
@@ -524,9 +548,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="text-xs font-bold text-white truncate block">
                       {currentUser.name}
                     </span>
-                    <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-white/10 text-slate-300 border border-white/10 shrink-0">
-                      {currentUser.role}
-                    </span>
+                    {currentUser.role !== 'GESTOR_ANALISTA' && (
+                      <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-white/10 text-slate-300 border border-white/10 shrink-0">
+                        {currentUser.role}
+                      </span>
+                    )}
                   </div>
                   <span className="text-[10px] text-slate-400 truncate block">
                     {currentUser.email}

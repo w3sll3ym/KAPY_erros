@@ -323,9 +323,10 @@ export const ResubmitInfoModal: React.FC<{
   onClose: () => void;
   onSuccess: () => void;
 }> = ({ isOpen, ticket, onClose, onSuccess }) => {
-  const { resubmitByCSM } = useWorkflow();
+  const { resubmitByCSM, servicesList } = useWorkflow();
 
   // Estados dos campos do chamado editáveis pelo CSM
+  const [service, setService] = useState(ticket.service || '');
   const [analystCell, setAnalystCell] = useState(ticket.analystCell || ticket.category || '');
   const [analystName, setAnalystName] = useState(ticket.analystName || '');
   const [clientName, setClientName] = useState(ticket.clientName || '');
@@ -356,6 +357,7 @@ export const ResubmitInfoModal: React.FC<{
   // Sincroniza se o ticket mudar
   React.useEffect(() => {
     if (ticket) {
+      setService(ticket.service || '');
       setAnalystCell(ticket.analystCell || ticket.category || '');
       setAnalystName(ticket.analystName || '');
       setClientName(ticket.clientName || '');
@@ -411,6 +413,7 @@ export const ResubmitInfoModal: React.FC<{
         responseNotes.trim() || 'Informações e campos corrigidos pelo CSM conforme apontamento do Analista.',
         [],
         {
+          service: service.trim(),
           analystCell: analystCell.trim(),
           analystName: analystName.trim(),
           clientName: clientName.trim(),
@@ -487,6 +490,29 @@ export const ResubmitInfoModal: React.FC<{
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Serviço / Fila de Atendimento */}
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Serviço / Fila de Atendimento (Direcionamento)
+                </label>
+                <input
+                  type="text"
+                  list="resubmit-services-list"
+                  value={service}
+                  onChange={(e) => setService(e.target.value)}
+                  placeholder="Ex: Triagem & Operações N2"
+                  className="w-full text-xs px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium text-purple-700"
+                />
+                <datalist id="resubmit-services-list">
+                  {servicesList.map((srv) => (
+                    <option key={srv} value={srv} />
+                  ))}
+                </datalist>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  Fila ou departamento para onde o chamado será encaminhado na triagem.
+                </p>
+              </div>
+
               {/* Célula do Analista */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">

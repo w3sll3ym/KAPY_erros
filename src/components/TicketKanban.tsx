@@ -135,11 +135,18 @@ export const TicketKanban: React.FC<TicketKanbanProps> = ({
                         <span className="text-[11px] font-bold text-slate-700 tracking-tight">
                           {ticket.code}
                         </span>
-                        {ticket.analystCell && (
-                          <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 truncate max-w-[120px]">
-                            {ticket.analystCell}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {ticket.service && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-200 truncate max-w-[120px]" title={`Serviço: ${ticket.service}`}>
+                              {ticket.service}
+                            </span>
+                          )}
+                          {ticket.analystCell && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-200 truncate max-w-[100px]">
+                              {ticket.analystCell}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* Title */}

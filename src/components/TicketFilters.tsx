@@ -20,6 +20,9 @@ interface TicketFiltersProps {
   clientFilter: string;
   onClientFilterChange: (client: string) => void;
   clientsList: string[];
+  serviceFilter: string;
+  onServiceFilterChange: (service: string) => void;
+  servicesList: string[];
   viewMode: 'table' | 'kanban';
   onViewModeChange: (mode: 'table' | 'kanban') => void;
   isOnlyMyActionsActive: boolean;
@@ -36,6 +39,9 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
   clientFilter,
   onClientFilterChange,
   clientsList,
+  serviceFilter,
+  onServiceFilterChange,
+  servicesList,
   viewMode,
   onViewModeChange,
   isOnlyMyActionsActive,
@@ -127,6 +133,24 @@ export const TicketFilters: React.FC<TicketFiltersProps> = ({
             {clientsList.map((client) => (
               <option key={client} value={client}>
                 {client}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Service Dropdown */}
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-slate-500 font-medium">Serviço:</span>
+          <select
+            value={serviceFilter}
+            onChange={(e) => onServiceFilterChange(e.target.value)}
+            className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer max-w-[170px] truncate"
+            title="Filtrar chamados por serviço direcionado"
+          >
+            <option value="ALL">Todos os Serviços</option>
+            {servicesList.map((srv) => (
+              <option key={srv} value={srv}>
+                {srv}
               </option>
             ))}
           </select>

@@ -1,4 +1,4 @@
-import { TicketStatus, StatusConfig, UserRole, UserProfile, ClientRecord, CategoryRecord } from '../types/workflow';
+import { TicketStatus, StatusConfig, UserRole, UserProfile, ClientRecord, CategoryRecord, ServiceRecord } from '../types/workflow';
 
 export const USER_PROFILES: Record<UserRole, UserProfile> = {
   CSM: {
@@ -320,6 +320,72 @@ export const DEFAULT_CATEGORIES: CategoryRecord[] = [
     id: 'cat-008',
     name: 'Outros',
     description: 'Erros e comportamentos anômalos não enquadrados nas categorias principais.',
+    color: 'slate',
+    status: 'ATIVO',
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export const DEFAULT_SERVICES_RECORDS: ServiceRecord[] = [
+  {
+    id: 'srv-001',
+    name: 'Triagem & Operações N2',
+    codePrefix: 'N2',
+    description: 'Fila de análise e triagem técnica de erros operacionais N2.',
+    color: 'purple',
+    status: 'ATIVO',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'srv-002',
+    name: 'Suporte Técnico N1',
+    codePrefix: 'SUP',
+    description: 'Atendimento inicial ao cliente e chamados de suporte técnico.',
+    color: 'blue',
+    status: 'ATIVO',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'srv-003',
+    name: 'Integrações & APIs',
+    codePrefix: 'API',
+    description: 'Falhas de webhooks, autenticação e integrações de parceiros.',
+    color: 'indigo',
+    status: 'ATIVO',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'srv-004',
+    name: 'Folha & Benefícios',
+    codePrefix: 'FOL',
+    description: 'Cálculos de folha, encargos e parametrizações previdenciárias.',
+    color: 'emerald',
+    status: 'ATIVO',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'srv-005',
+    name: 'Financeiro & Cobrança',
+    codePrefix: 'FIN',
+    description: 'Divergências de faturamento, conciliação e emissão de notas.',
+    color: 'amber',
+    status: 'ATIVO',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'srv-006',
+    name: 'Infraestrutura & Redes',
+    codePrefix: 'INF',
+    description: 'Incidentes de conectividade, servidores e lentidão do sistema.',
+    color: 'rose',
+    status: 'ATIVO',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'srv-007',
+    name: 'Atendimento Geral',
+    codePrefix: 'GER',
+    description: 'Fila geral de solicitações corporativas e triagem básica.',
     color: 'slate',
     status: 'ATIVO',
     createdAt: new Date().toISOString(),

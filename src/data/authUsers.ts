@@ -9,6 +9,7 @@ export interface SimulatedUserAccount {
   title: string;
   team: string;
   avatar: string;
+  service?: string;
   badgeLabel: string;
   badgeColor: string;
   accentBorder: string;
@@ -27,6 +28,7 @@ export const SIMULATED_ACCOUNTS: Record<UserRole, SimulatedUserAccount> = {
     passwordHint: '123',
     title: 'Customer Success Manager',
     team: 'Relacionamento & Contas Estratégicas',
+    service: 'Atendimento Geral',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
     badgeLabel: 'Relacionamento & CSM',
@@ -51,6 +53,7 @@ export const SIMULATED_ACCOUNTS: Record<UserRole, SimulatedUserAccount> = {
     passwordHint: '123',
     title: 'Analista de Operações / Supervisor',
     team: 'Triagem & Suporte Técnico N2',
+    service: 'Triagem & Operações N2',
     avatar:
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     badgeLabel: 'Operações & Triagem',
@@ -75,6 +78,7 @@ export const SIMULATED_ACCOUNTS: Record<UserRole, SimulatedUserAccount> = {
     passwordHint: '123',
     title: 'Especialista em Garantia da Qualidade (QA)',
     team: 'Auditoria & Qualidade Técnica',
+    service: 'Triagem & Operações N2',
     avatar:
       'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
     badgeLabel: 'Auditoria & Qualidade QA',
@@ -98,6 +102,7 @@ export const SIMULATED_ACCOUNTS: Record<UserRole, SimulatedUserAccount> = {
     passwordHint: '123',
     title: 'Administrador do Sistema & Gestor OPs',
     team: 'Governança & Administração',
+    service: 'Administração & Governança',
     avatar:
       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     badgeLabel: 'Governança & Gestão',
@@ -122,6 +127,7 @@ export const SIMULATED_ACCOUNTS: Record<UserRole, SimulatedUserAccount> = {
     passwordHint: '123',
     title: 'Gestor de Triagem & Operações N1/N2',
     team: 'Gestão de Operações & Triagem',
+    service: 'Triagem & Operações N2',
     avatar:
       'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
     badgeLabel: 'Gestão de Analistas',
@@ -148,6 +154,7 @@ export const DEFAULT_SYSTEM_USERS = [
     role: 'CSM' as const,
     title: 'Customer Success Manager',
     team: 'Relacionamento & Contas Estratégicas',
+    service: 'Atendimento Geral',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
     status: 'ATIVO' as const,
     createdAt: new Date().toISOString(),
@@ -159,6 +166,7 @@ export const DEFAULT_SYSTEM_USERS = [
     role: 'ANALISTA' as const,
     title: 'Analista de Operações / Supervisor N2',
     team: 'Triagem & Suporte N2',
+    service: 'Triagem & Operações N2',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     status: 'ATIVO' as const,
     managerId: 'user-007',
@@ -172,6 +180,7 @@ export const DEFAULT_SYSTEM_USERS = [
     role: 'QUALIDADE' as const,
     title: 'Especialista em Garantia da Qualidade (QA)',
     team: 'Auditoria & Qualidade Técnica',
+    service: 'Triagem & Operações N2',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
     status: 'ATIVO' as const,
     createdAt: new Date().toISOString(),
@@ -183,6 +192,7 @@ export const DEFAULT_SYSTEM_USERS = [
     role: 'ADMIN' as const,
     title: 'Administrador do Sistema & Gestor OPs',
     team: 'Governança & Administração',
+    service: 'Administração & Governança',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     status: 'ATIVO' as const,
     createdAt: new Date().toISOString(),
@@ -194,6 +204,7 @@ export const DEFAULT_SYSTEM_USERS = [
     role: 'CSM' as const,
     title: 'Customer Success Specialist',
     team: 'Relacionamento & Contas Estratégicas',
+    service: 'Atendimento Geral',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
     status: 'ATIVO' as const,
     createdAt: new Date().toISOString(),
@@ -205,6 +216,7 @@ export const DEFAULT_SYSTEM_USERS = [
     role: 'ANALISTA' as const,
     title: 'Analista de Operações N1',
     team: 'Triagem & Suporte N1/N2',
+    service: 'Suporte Técnico N1',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     status: 'ATIVO' as const,
     managerId: 'user-007',
@@ -218,6 +230,7 @@ export const DEFAULT_SYSTEM_USERS = [
     role: 'GESTOR_ANALISTA' as const,
     title: 'Gestor de Triagem & Operações N1/N2',
     team: 'Gestão de Operações & Triagem',
+    service: 'Triagem & Operações N2',
     avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
     status: 'ATIVO' as const,
     supervisedAnalysts: ['Carlos Mendes', 'Juliana Costa'],

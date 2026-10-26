@@ -65,11 +65,12 @@ const ROLE_INFO: Record<
 };
 
 export const AdminUsersManagement: React.FC = () => {
-  const { systemUsers, saveUser, updateUserRole, deleteUser } = useWorkflow();
+  const { systemUsers, saveUser, updateUserRole, deleteUser, servicesList } = useWorkflow();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [serviceFilter, setServiceFilter] = useState<string>('ALL');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -82,6 +83,7 @@ export const AdminUsersManagement: React.FC = () => {
     role: 'CSM' as UserRole,
     title: '',
     team: '',
+    service: '',
     avatar: AVATAR_PRESETS[0],
     status: 'ATIVO' as 'ATIVO' | 'INATIVO',
     supervisedAnalysts: [] as string[],
@@ -103,17 +105,19 @@ export const AdminUsersManagement: React.FC = () => {
     return systemUsers.filter((u) => {
       if (roleFilter !== 'ALL' && u.role !== roleFilter) return false;
       if (statusFilter !== 'ALL' && u.status !== statusFilter) return false;
+      if (serviceFilter !== 'ALL' && u.service !== serviceFilter) return false;
       if (searchTerm.trim()) {
         const q = searchTerm.toLowerCase();
         const matchesName = u.name?.toLowerCase().includes(q);
         const matchesEmail = u.email?.toLowerCase().includes(q);
         const matchesTitle = u.title?.toLowerCase().includes(q);
         const matchesTeam = u.team?.toLowerCase().includes(q);
-        if (!matchesName && !matchesEmail && !matchesTitle && !matchesTeam) return false;
+        const matchesService = u.service?.toLowerCase().includes(q);
+        if (!matchesName && !matchesEmail && !matchesTitle && !matchesTeam && !matchesService) return false;
       }
       return true;
     });
-  }, [systemUsers, roleFilter, statusFilter, searchTerm]);
+  }, [systemUsers, roleFilter, statusFilter, serviceFilter, searchTerm]);
 
   // List of active analysts for hierarchy assignment
   const activeAnalysts = useMemo(() => {
@@ -133,6 +137,7 @@ export const AdminUsersManagement: React.FC = () => {
       role: 'CSM',
       title: 'Customer Success Specialist',
       team: 'Relacionamento & Contas',
+      service: 'Atendimento Geral',
       avatar: AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)],
       status: 'ATIVO',
       supervisedAnalysts: [],
@@ -151,6 +156,7 @@ export const AdminUsersManagement: React.FC = () => {
       role: user.role,
       title: user.title,
       team: user.team,
+      service: user.service || 'Triagem & Operações N2',
       avatar: user.avatar || AVATAR_PRESETS[0],
       status: user.status || 'ATIVO',
       supervisedAnalysts: user.supervisedAnalysts || [],
@@ -283,12 +289,28 @@ export const AdminUsersManagement: React.FC = () => {
             <option value="INATIVO">Inativos</option>
           </select>
 
-          {(searchTerm || roleFilter !== 'ALL' || statusFilter !== 'ALL') && (
+          {/* Filter by Service */}
+          <select
+            value={serviceFilter}
+            onChange={(e) => setServiceFilter(e.target.value)}
+            className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white text-slate-700 focus:outline-none focus:border-purple-500 cursor-pointer max-w-[170px] truncate"
+            title="Filtrar por Serviço de atendimento"
+          >
+            <option value="ALL">Todos os Serviços</option>
+            {servicesList.map((srv) => (
+              <option key={srv} value={srv}>
+                {srv}
+              </option>
+            ))}
+          </select>
+
+          {(searchTerm || roleFilter !== 'ALL' || statusFilter !== 'ALL' || serviceFilter !== 'ALL') && (
             <button
               onClick={() => {
                 setSearchTerm('');
                 setRoleFilter('ALL');
                 setStatusFilter('ALL');
+                setServiceFilter('ALL');
               }}
               className="text-xs text-slate-500 hover:text-slate-800 underline px-1 cursor-pointer"
             >
@@ -357,6 +379,12 @@ export const AdminUsersManagement: React.FC = () => {
                         <span className="text-[11px] text-slate-500 block truncate">
                           {user.team || 'Geral'}
                         </span>
+                        <div className="mt-1 flex items-center gap-1">
+                          <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-1.5 py-0.5 rounded inline-flex items-center gap-1" title="Serviço ao qual os chamados são direcionados">
+                            <Layers className="w-3 h-3" />
+                            Serviço: {user.service || 'Geral'}
+                          </span>
+                        </div>
                         {user.role === 'GESTOR_ANALISTA' && (
                           <span className="text-[10px] text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded font-medium mt-1 inline-flex items-center gap-1">
                             👔 Supervisiona:{' '}
@@ -585,6 +613,34 @@ export const AdminUsersManagement: React.FC = () => {
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
                   />
                 </div>
+              </div>
+
+              {/* Serviço / Fila de Atendimento (Direcionamento de Chamados) */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                  <span>Serviço / Fila de Atendimento</span>
+                  <span className="text-[10px] text-purple-600 font-medium">
+                    Direcionamento de chamados
+                  </span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    list="services-datalist-input"
+                    value={formData.service}
+                    onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                    placeholder="Ex: Triagem & Operações N2, Suporte Técnico N1, Integrações & APIs..."
+                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 bg-slate-50/50"
+                  />
+                  <datalist id="services-datalist-input">
+                    {servicesList.map((srv) => (
+                      <option key={srv} value={srv} />
+                    ))}
+                  </datalist>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Os chamados abertos direcionados a este serviço serão atribuídos e visualizados pelos analistas cadastrados nele.
+                </p>
               </div>
 
               {/* Hierarchy Configuration Section */}

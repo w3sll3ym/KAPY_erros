@@ -27,9 +27,17 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
   onClose,
   onTicketCreated,
 }) => {
-  const { createTicket, currentRole, setCurrentRole, currentUser, clientsList } = useWorkflow();
+  const {
+    createTicket,
+    currentRole,
+    setCurrentRole,
+    currentUser,
+    clientsList,
+    systemUsers,
+    servicesList,
+  } = useWorkflow();
 
-  // Os 8 campos obrigatórios solicitados:
+  // Os campos obrigatórios solicitados:
   // 1. Célula do Analista
   // 2. Cliente
   // 3. Data da Análise
@@ -38,9 +46,11 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
   // 6. Nome do Analista
   // 7. Quantidade de colaboradores impactados
   // 8. Quantidade de competências impactadas
+  // 9. Serviço de direcionamento
 
   const [analystCell, setAnalystCell] = useState('');
   const [clientName, setClientName] = useState('');
+  const [service, setService] = useState('Triagem & Operações N2');
   const [analysisDate, setAnalysisDate] = useState(() => {
     return new Date().toISOString().split('T')[0];
   });
@@ -56,6 +66,18 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // When analyst is selected, sync the service automatically
+  const handleAnalystChange = (val: string) => {
+    setAnalystName(val);
+    if (errors.analystName) setErrors((prev) => ({ ...prev, analystName: '' }));
+    const foundAnalyst = systemUsers.find(
+      (u) => u.name.toLowerCase() === val.trim().toLowerCase()
+    );
+    if (foundAnalyst?.service) {
+      setService(foundAnalyst.service);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -104,6 +126,7 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
       const created = await createTicket({
         analystCell: analystCell.trim(),
         clientName: clientName.trim(),
+        service: service.trim(),
         analysisDate,
         documentList: documentList.trim(),
         errorReasonDC: errorReasonDC.trim(),
@@ -218,18 +241,53 @@ export const NewTicketModal: React.FC<NewTicketModalProps> = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Ex: Rodrigo Santos"
+                  list="analysts-datalist"
+                  placeholder="Ex: Carlos Mendes"
                   value={analystName}
-                  onChange={(e) => {
-                    setAnalystName(e.target.value);
-                    if (errors.analystName) setErrors((prev) => ({ ...prev, analystName: '' }));
-                  }}
+                  onChange={(e) => handleAnalystChange(e.target.value)}
                   className="w-full text-xs sm:text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white"
                 />
+                <datalist id="analysts-datalist">
+                  {systemUsers
+                    .filter((u) => u.role === 'ANALISTA' && u.status !== 'INATIVO')
+                    .map((a) => (
+                      <option key={a.id} value={a.name}>
+                        {a.service ? `Serviço: ${a.service}` : ''}
+                      </option>
+                    ))}
+                </datalist>
               </div>
               {errors.analystName && (
                 <p className="text-[11px] text-rose-600 mt-1">{errors.analystName}</p>
               )}
+            </div>
+
+            {/* Serviço de Direcionamento do Chamado */}
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-semibold text-slate-800 mb-1 flex items-center justify-between">
+                <span>Serviço / Fila de Atendimento <span className="text-rose-500">*</span></span>
+                <span className="text-[11px] text-blue-600 font-medium">
+                  Direcionamento do Chamado
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  list="ticket-services-datalist"
+                  placeholder="Selecione ou digite o serviço responsável (Ex: Triagem & Operações N2)..."
+                  value={service}
+                  onChange={(e) => setService(e.target.value)}
+                  className="w-full text-xs sm:text-sm px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white"
+                />
+                <datalist id="ticket-services-datalist">
+                  {servicesList.map((srv) => (
+                    <option key={srv} value={srv} />
+                  ))}
+                </datalist>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Os chamados abertos serão direcionados a este serviço e encaminhados para a equipe vinculada.
+              </p>
             </div>
           </div>
 

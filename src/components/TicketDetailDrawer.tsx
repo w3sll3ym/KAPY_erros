@@ -167,6 +167,11 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
               <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                 {currentTicket.code}
               </span>
+              {currentTicket.service && (
+                <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                  Serviço: {currentTicket.service}
+                </span>
+              )}
             </div>
 
             <div className="flex items-center gap-1">
@@ -525,6 +530,15 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-500 block">
+                      Serviço / Fila de Atendimento
+                    </span>
+                    <span className="font-semibold text-purple-700 block mt-0.5">
+                      {currentTicket.service || 'Geral (Triagem Padrão)'}
+                    </span>
+                  </div>
+
                   <div>
                     <span className="text-[10px] uppercase font-bold text-slate-500 block">
                       Célula do Analista

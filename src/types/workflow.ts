@@ -11,9 +11,20 @@ export interface UserProfile {
   team: string;
   avatar: string;
   email: string;
+  service?: string; // Serviço / Fila de atendimento vinculada ao colaborador
   supervisedAnalysts?: string[]; // Para GESTOR_ANALISTA: nomes dos analistas sob sua hierarquia
   managerName?: string; // Para ANALISTA: nome do gestor responsável
 }
+
+export const DEFAULT_SERVICES = [
+  'Triagem & Operações N2',
+  'Suporte Técnico N1',
+  'Integrações & APIs',
+  'Folha & Benefícios',
+  'Financeiro & Cobrança',
+  'Infraestrutura & Redes',
+  'Atendimento Geral',
+] as const;
 
 export interface SystemUser {
   id: string;
@@ -23,6 +34,7 @@ export interface SystemUser {
   title: string;
   team: string;
   avatar: string;
+  service?: string; // Serviço / Fila de Atendimento vinculada ao usuário
   status: 'ATIVO' | 'INATIVO';
   supervisedAnalysts?: string[]; // Nomes ou IDs dos analistas sob a hierarquia do gestor
   managerId?: string; // ID do Gestor de Analista
@@ -47,6 +59,17 @@ export interface ClientRecord {
 export interface CategoryRecord {
   id: string;
   name: string;
+  description?: string;
+  color?: string;
+  status: 'ATIVO' | 'INATIVO';
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ServiceRecord {
+  id: string;
+  name: string;
+  codePrefix: string; // Sufixo / Sigla que inicia o código do chamado (ex: 'N2', 'SUP', 'API', 'FOL')
   description?: string;
   color?: string;
   status: 'ATIVO' | 'INATIVO';
@@ -117,6 +140,7 @@ export interface Ticket {
   documentList?: string; // Listagem de documentos
   errorReasonDC?: string; // Motivo do Erro - DC
   analystName?: string; // Nome do Analista
+  service?: string; // Serviço ao qual o chamado está direcionado
   impactedEmployeesCount?: number; // Quantidade de colaboradores impactados
   impactedCompetenciesCount?: number; // Quantidade de competências impactadas
 

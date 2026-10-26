@@ -192,6 +192,7 @@ const MainDashboard: React.FC = () => {
     loading,
     error,
     clientsList,
+    servicesList,
     getSupervisedAnalysts,
   } = useWorkflow();
 
@@ -283,6 +284,7 @@ const MainDashboard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'ALL'>('ALL');
   const [clientFilter, setClientFilter] = useState<string>('ALL');
+  const [serviceFilter, setServiceFilter] = useState<string>('ALL');
   const [isOnlyMyActionsActive, setIsOnlyMyActionsActive] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
     try {
@@ -418,6 +420,11 @@ const MainDashboard: React.FC = () => {
         return false;
       }
 
+      // 3.1 Service filter
+      if (serviceFilter !== 'ALL' && t.service !== serviceFilter) {
+        return false;
+      }
+
       // 4. My actions only
       if (isOnlyMyActionsActive) {
         if (currentRole === 'CSM' && t.status !== 'INFORMACOES_FALTANDO') {
@@ -447,6 +454,7 @@ const MainDashboard: React.FC = () => {
     searchTerm,
     statusFilter,
     clientFilter,
+    serviceFilter,
     isOnlyMyActionsActive,
     currentRole,
     currentUser,
@@ -457,12 +465,14 @@ const MainDashboard: React.FC = () => {
     searchTerm !== '' ||
     statusFilter !== 'ALL' ||
     clientFilter !== 'ALL' ||
+    serviceFilter !== 'ALL' ||
     isOnlyMyActionsActive;
 
   const handleResetFilters = () => {
     setSearchTerm('');
     setStatusFilter('ALL');
     setClientFilter('ALL');
+    setServiceFilter('ALL');
     setIsOnlyMyActionsActive(false);
   };
 
@@ -678,9 +688,11 @@ const MainDashboard: React.FC = () => {
                   <span className="text-xs font-bold text-slate-800 block">
                     {currentUser.name}
                   </span>
-                  <span className="text-[10px] text-slate-500 block">
-                    {currentUser.role}
-                  </span>
+                  {currentUser.role !== 'GESTOR_ANALISTA' && (
+                    <span className="text-[10px] text-slate-500 block">
+                      {currentUser.role}
+                    </span>
+                  )}
                 </div>
                 <button
                   onClick={logout}
@@ -764,6 +776,9 @@ const MainDashboard: React.FC = () => {
                   clientFilter={clientFilter}
                   onClientFilterChange={setClientFilter}
                   clientsList={clientsList}
+                  serviceFilter={serviceFilter}
+                  onServiceFilterChange={setServiceFilter}
+                  servicesList={servicesList}
                   viewMode={viewMode}
                   onViewModeChange={setViewMode}
                   isOnlyMyActionsActive={isOnlyMyActionsActive}

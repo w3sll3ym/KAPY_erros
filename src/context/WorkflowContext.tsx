@@ -30,8 +30,10 @@ import {
   SystemUser,
   ClientRecord,
   CategoryRecord,
+  ServiceRecord,
+  DEFAULT_SERVICES,
 } from '../types/workflow';
-import { USER_PROFILES, DEFAULT_CLIENTS, DEFAULT_CATEGORIES } from '../data/statusConfig';
+import { USER_PROFILES, DEFAULT_CLIENTS, DEFAULT_CATEGORIES, DEFAULT_SERVICES_RECORDS } from '../data/statusConfig';
 import { SIMULATED_ACCOUNTS, DEFAULT_SYSTEM_USERS } from '../data/authUsers';
 
 export enum OperationType {
@@ -100,8 +102,10 @@ interface WorkflowContextType {
   systemUsers: SystemUser[];
   clients: ClientRecord[];
   categories: CategoryRecord[];
+  services: ServiceRecord[];
   clientsList: string[];
   categoriesList: string[];
+  servicesList: string[];
   saveUser: (user: Partial<SystemUser> & { id?: string }) => Promise<void>;
   updateUserRole: (userId: string, newRole: UserRole) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
@@ -110,6 +114,8 @@ interface WorkflowContextType {
   deleteClient: (clientId: string) => Promise<void>;
   saveCategory: (category: Partial<CategoryRecord> & { id?: string }) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
+  saveService: (service: Partial<ServiceRecord> & { id?: string }) => Promise<void>;
+  deleteService: (serviceId: string) => Promise<void>;
   metrics: {
     total: number;
     abertosTotal: number;
@@ -134,6 +140,7 @@ interface WorkflowContextType {
     analystName: string;
     impactedEmployeesCount: number;
     impactedCompetenciesCount: number;
+    service?: string;
     title?: string;
     clientSegment?: string;
     category?: string;
@@ -153,6 +160,7 @@ interface WorkflowContextType {
     updatedFields?: {
       analystCell?: string;
       analystName?: string;
+      service?: string;
       clientName?: string;
       clientSegment?: string;
       category?: string;
@@ -588,6 +596,22 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     return list.length > 0 ? list : DEFAULT_CATEGORIES.map((c) => c.name);
   }, [categories]);
 
+  // Derived services list for ticket routing, user assignment and filters
+  const servicesList = useMemo(() => {
+    const set = new Set<string>(DEFAULT_SERVICES);
+    systemUsers.forEach((u) => {
+      if (u.service && u.service.trim() && u.status !== 'INATIVO') {
+        set.add(u.service.trim());
+      }
+    });
+    tickets.forEach((t) => {
+      if (t.service && t.service.trim()) {
+        set.add(t.service.trim());
+      }
+    });
+    return Array.from(set);
+  }, [systemUsers, tickets]);
+
   // Admin Management Methods: Users, Roles, Clients, Categories
   const saveUser = async (userData: Partial<SystemUser> & { id?: string }) => {
     const id = userData.id || `user-${Date.now()}`;
@@ -598,6 +622,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
       role: userData.role || 'CSM',
       title: userData.title || 'Operador',
       team: userData.team || 'Operações',
+      service: userData.service || '',
       avatar:
         userData.avatar ||
         'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
@@ -883,6 +908,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     analystName: string;
     impactedEmployeesCount: number;
     impactedCompetenciesCount: number;
+    service?: string;
     title?: string;
     clientSegment?: string;
     category?: string;
@@ -900,11 +926,26 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     const chosenSeverity = data.severity || 'MEDIA';
     const chosenCategory = data.category || 'Geral';
     const chosenSegment = data.clientSegment || 'Corporativo';
+
+    // Automatic service routing / association
+    let assignedService = data.service?.trim();
+    if (!assignedService && data.analystName) {
+      const matchedUser = systemUsers.find(
+        (u) => u.name.toLowerCase() === data.analystName.toLowerCase()
+      );
+      if (matchedUser?.service) {
+        assignedService = matchedUser.service;
+      }
+    }
+    if (!assignedService) {
+      assignedService = 'Triagem & Operações N2';
+    }
+
     const finalTitle =
       data.title?.trim() || `${data.errorReasonDC} - ${data.clientName}`;
     const finalDescription =
       data.description?.trim() ||
-      `Erro apontado na célula ${data.analystCell} pelo analista ${data.analystName}.\nMotivo DC: ${data.errorReasonDC}\nDocumentos: ${data.documentList}\nColaboradores impactados: ${data.impactedEmployeesCount} | Competências impactadas: ${data.impactedCompetenciesCount}`;
+      `Erro apontado na célula ${data.analystCell} pelo analista ${data.analystName}.\nServiço: ${assignedService}\nMotivo DC: ${data.errorReasonDC}\nDocumentos: ${data.documentList}\nColaboradores impactados: ${data.impactedEmployeesCount} | Competências impactadas: ${data.impactedCompetenciesCount}`;
 
     const initialEvent: TimelineEvent = {
       id: `evt-${Date.now()}-1`,
@@ -913,7 +954,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
       authorName: currentUser.name,
       actionType: 'CRIACAO',
       title: 'Chamado Aberto pelo CSM',
-      description: `Reporte de erro cadastrado para o cliente ${data.clientName} (Célula: ${data.analystCell}, Analista: ${data.analystName}, Motivo: ${data.errorReasonDC}).`,
+      description: `Reporte de erro cadastrado para o cliente ${data.clientName} (Serviço: ${assignedService}, Célula: ${data.analystCell}, Analista: ${data.analystName}, Motivo: ${data.errorReasonDC}).`,
       newStatus: 'NOVO_AGUARDANDO_TRIAGEM',
       attachments: data.attachments || [],
     };
@@ -926,6 +967,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
       clientSegment: chosenSegment,
       category: chosenCategory,
       severity: chosenSeverity,
+      service: assignedService,
       description: finalDescription,
       analystCell: data.analystCell,
       analysisDate: data.analysisDate,
@@ -1175,6 +1217,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
     updatedFields?: {
       analystCell?: string;
       analystName?: string;
+      service?: string;
       clientName?: string;
       clientSegment?: string;
       category?: string;
@@ -1229,6 +1272,8 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
         updatePayload.analystCell = updatedFields.analystCell;
       if (updatedFields.analystName !== undefined)
         updatePayload.analystName = updatedFields.analystName;
+      if (updatedFields.service !== undefined)
+        updatePayload.service = updatedFields.service;
       if (updatedFields.clientName !== undefined)
         updatePayload.clientName = updatedFields.clientName;
       if (updatedFields.clientSegment !== undefined)
@@ -1459,6 +1504,7 @@ export const WorkflowProvider: React.FC<{ children: ReactNode }> = ({ children }
         categories,
         clientsList,
         categoriesList,
+        servicesList,
         saveUser,
         updateUserRole,
         deleteUser,

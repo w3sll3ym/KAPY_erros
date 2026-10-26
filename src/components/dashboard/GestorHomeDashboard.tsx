@@ -81,10 +81,6 @@ export const GestorHomeDashboard: React.FC<GestorHomeDashboardProps> = ({
       <div className="bg-linear-to-r from-[#0b132b] via-indigo-950 to-slate-900 text-white rounded-2xl p-6 sm:p-7 shadow-sm border border-indigo-900/40 relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-semibold">
-              <Users className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Hierarquia de Operações & Triagem</span>
-            </div>
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
               Painel de Gestão · {currentUser.name}
             </h2>
